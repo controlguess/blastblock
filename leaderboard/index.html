@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blast Block Leaderboard</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            background: radial-gradient(circle at center, #1b2559 0%, #090d20 100%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .podium-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .podium-card:hover {
+            transform: translateY(-4px);
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden text-white flex justify-center items-center p-4 lg:p-8">
+
+    <div class="fixed top-4 left-4 lg:top-6 lg:left-8 z-[60]">
+        <a href="/" class="h-10 lg:h-11 px-4 rounded-2xl glass-panel flex items-center gap-2 text-cyan-300 hover:text-white active:scale-95 transition text-xs lg:text-sm font-bold border border-white/15 shadow-lg">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to Game</span>
+        </a>
+    </div>
+
+    <div class="w-full h-full max-w-4xl flex flex-col glass-panel rounded-3xl p-5 lg:p-8 overflow-hidden border border-white/15 relative">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-white/10 shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 text-white text-2xl">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl lg:text-3xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-amber-300 to-orange-400">
+                        LEADERBOARD
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium">Top Blast Block Players</p>
+                </div>
+            </div>
+
+            <div class="flex bg-slate-900/80 p-1.5 rounded-2xl border border-white/10 w-full sm:w-auto">
+                <button id="tab-high-score" class="flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-crown text-amber-300"></i>
+                    <span>Highest Score</span>
+                </button>
+                <button id="tab-high-streak" class="flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bolt text-orange-400"></i>
+                    <span>Highest Streak</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="leaderboard-container" class="flex-1 overflow-y-auto scrollbar-thin pt-6 pr-1 flex flex-col gap-6">
+            <div id="podium-section" class="grid grid-cols-3 gap-2 sm:gap-4 shrink-0 pt-2"></div>
+            <div class="flex flex-col gap-2 pb-4" id="rankings-list"></div>
+        </div>
+
+        <div id="loading-spinner" class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center z-20 transition-opacity">
+            <div class="flex flex-col items-center gap-3">
+                <i class="fa-solid fa-spinner fa-spin text-3xl text-cyan-400"></i>
+                <span class="text-xs font-bold tracking-widest uppercase text-slate-300">Loading Ranks...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'high_score';
+        let cachedLeaderboardData = [];
+        const currentUserId = localStorage.getItem('blast_block_token') ? getUserIdFromToken() : null;
+
+        function getUserIdFromToken() {
+            try {
+                const profile = JSON.parse(localStorage.getItem('blast_block_profile') || '{}');
+                return profile.id || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        const tabHighScore = document.getElementById('tab-high-score');
+        const tabHighStreak = document.getElementById('tab-high-streak');
+        const podiumSection = document.getElementById('podium-section');
+        const rankingsList = document.getElementById('rankings-list');
+        const loadingSpinner = document.getElementById('loading-spinner');
+
+        async function fetchLeaderboard() {
+            showLoading(true);
+            try {
+                const res = await fetch('https://testing.blastblock.space/api/leaderboard');
+                if (!res.ok) throw new Error('Failed to load leaderboard data');
+                const json = await res.json();
+                cachedLeaderboardData = json.data || json.leaderboard || [];
+            } catch (err) {
+                cachedLeaderboardData = generateDemoLeaderboard();
+            } finally {
+                renderLeaderboard();
+                showLoading(false);
+            }
+        }
+
+        function showLoading(show) {
+            if (show) {
+                loadingSpinner.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+                loadingSpinner.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        function sortData(data, key) {
+            return [...data].sort((a, b) => (b[key] || 0) - (a[key] || 0));
+        }
+
+        function renderLeaderboard() {
+            const sorted = sortData(cachedLeaderboardData, currentTab);
+            const top1 = sorted[0];
+            const top2 = sorted[1];
+            const top3 = sorted[2];
+
+            podiumSection.innerHTML = `
+                ${renderPodiumCard(top2, 2, 'border-slate-400/40', 'from-slate-700/50 to-slate-900/80', 'text-slate-300')}
+                ${renderPodiumCard(top1, 1, 'border-amber-400/60', 'from-amber-500/20 to-slate-900/90', 'text-amber-300', true)}
+                ${renderPodiumCard(top3, 3, 'border-amber-700/40', 'from-amber-900/30 to-slate-900/80', 'text-amber-600')}
+            `;
+
+            const rest = sorted.slice(3);
+            rankingsList.innerHTML = '';
+
+            if (rest.length === 0) {
+                rankingsList.innerHTML = `<div class="text-center text-xs text-slate-500 py-6">No additional players recorded yet.</div>`;
+            } else {
+                rest.forEach((player, idx) => {
+                    const rank = idx + 4;
+                    const isCurrentUser = currentUserId && player.id === currentUserId;
+                    rankingsList.appendChild(createRankingRow(player, rank, isCurrentUser));
+                });
+            }
+
+            gsap.fromTo('.podium-card', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.1 });
+            gsap.fromTo('.ranking-row', { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.3, stagger: 0.05 });
+        }
+
+        function renderPodiumCard(player, rank, borderColor, bgGradient, crownColor, isCenter = false) {
+            if (!player) return `<div class="glass-panel p-4 rounded-2xl flex flex-col items-center justify-center text-slate-500 text-xs">No Rank #${rank}</div>`;
+
+            const val = currentTab === 'high_score' 
+                ? (player.high_score || 0).toLocaleString()
+                : (player.highest_streak || 0);
+
+            const label = currentTab === 'high_score' ? 'PTS' : 'STREAK';
+
+            const crownIcons = {
+                1: 'fa-crown text-amber-400 text-2xl',
+                2: 'fa-medal text-slate-300 text-xl',
+                3: 'fa-award text-amber-600 text-xl'
+            };
+
+            return `
+                <div class="podium-card glass-panel rounded-2xl sm:rounded-3xl p-3 sm:p-5 flex flex-col items-center text-center border ${borderColor} bg-gradient-to-b ${bgGradient} relative ${isCenter ? '-mt-2 shadow-2xl' : ''}">
+                    <div class="absolute -top-3.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border ${borderColor} flex items-center justify-center shadow-lg">
+                        <i class="fa-solid ${crownIcons[rank]}"></i>
+                    </div>
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-800 border-2 border-white/20 flex items-center justify-center overflow-hidden mt-3 mb-2 shrink-0">
+                        ${player.avatar_url 
+                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover" alt="Avatar">`
+                            : `<i class="fa-solid fa-user text-lg sm:text-2xl text-slate-400"></i>`
+                        }
+                    </div>
+                    <h3 class="font-black text-xs sm:text-sm text-white truncate w-full">${player.username || 'Anonymous'}</h3>
+                    <div class="mt-2 flex flex-col items-center">
+                        <span class="text-base sm:text-2xl font-black ${crownColor}">${val}</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold text-slate-400 tracking-wider">${label}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createRankingRow(player, rank, isCurrentUser) {
+            const row = document.createElement('div');
+            row.className = `ranking-row glass-panel p-3.5 rounded-2xl flex items-center justify-between border transition ${
+                isCurrentUser ? 'border-cyan-400/80 bg-cyan-500/10' : 'border-white/10 hover:border-white/20'
+            }`;
+
+            const val = currentTab === 'high_score' 
+                ? (player.high_score || 0).toLocaleString()
+                : (player.highest_streak || 0);
+
+            const unit = currentTab === 'high_score' ? 'pts' : 'x streak';
+
+            row.innerHTML = `
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="w-7 text-center font-black text-xs sm:text-sm text-slate-400">#${rank}</span>
+                    <div class="w-8 h-8 rounded-full bg-slate-800 border border-white/15 flex items-center justify-center overflow-hidden shrink-0">
+                        ${player.avatar_url 
+                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover" alt="Avatar">`
+                            : `<i class="fa-solid fa-user text-xs text-slate-400"></i>`
+                        }
+                    </div>
+                    <span class="font-bold text-xs sm:text-sm text-slate-200 truncate ${isCurrentUser ? 'text-cyan-300 font-black' : ''}">
+                        ${player.username || 'Anonymous'} ${isCurrentUser ? '<span class="text-[10px] bg-cyan-500/30 text-cyan-300 px-1.5 py-0.5 rounded font-bold ml-1">YOU</span>' : ''}
+                    </span>
+                </div>
+                <div class="flex items-center gap-1 font-black text-xs sm:text-sm ${currentTab === 'high_score' ? 'text-amber-300' : 'text-orange-400'}">
+                    <span>${val}</span>
+                    <span class="text-[10px] text-slate-400 font-semibold">${unit}</span>
+                </div>
+            `;
+
+            return row;
+        }
+
+        tabHighScore.addEventListener('click', () => {
+            if (currentTab === 'high_score') return;
+            currentTab = 'high_score';
+            tabHighScore.className = 'flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md transition flex items-center justify-center gap-2';
+            tabHighStreak.className = 'flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl text-slate-400 hover:text-white transition flex items-center justify-center gap-2';
+            renderLeaderboard();
+        });
+
+        tabHighStreak.addEventListener('click', () => {
+            if (currentTab === 'highest_streak') return;
+            currentTab = 'highest_streak';
+            tabHighStreak.className = 'flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md transition flex items-center justify-center gap-2';
+            tabHighScore.className = 'flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl text-slate-400 hover:text-white transition flex items-center justify-center gap-2';
+            renderLeaderboard();
+        });
+
+        function generateDemoLeaderboard() {
+            return [
+                { id: '1', username: 'BlockMaster', high_score: 42500, highest_streak: 18, avatar_url: '' },
+                { id: '2', username: 'PixelKnight', high_score: 38200, highest_streak: 14, avatar_url: '' },
+                { id: '3', username: 'BlastKing', high_score: 31900, highest_streak: 22, avatar_url: '' },
+                { id: '4', username: 'GridRunner', high_score: 27400, highest_streak: 11, avatar_url: '' },
+                { id: '5', username: 'CubeDestroyer', high_score: 24100, highest_streak: 9, avatar_url: '' },
+                { id: '6', username: 'ComboGod', high_score: 19800, highest_streak: 15, avatar_url: '' },
+                { id: '7', username: 'NeoMatrix', high_score: 16500, highest_streak: 8, avatar_url: '' },
+                { id: '8', username: 'ShadowBlock', high_score: 12400, highest_streak: 6, avatar_url: '' }
+            ];
+        }
+
+        window.onload = fetchLeaderboard;
+    </script>
+</body>
+</html>
