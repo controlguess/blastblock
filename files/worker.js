@@ -182,7 +182,7 @@ btnToggleMenu.addEventListener('click', (e) => {
     topSlideMenu.classList.toggle('closed');
 });
 
-window.addEventListener('click', (e) => {
+window?.addEventListener('click', (e) => {
     if (!topSlideMenu.contains(e.target) && !btnToggleMenu.contains(e.target)) {
         topSlideMenu.classList.add('closed');
         topSlideMenu.classList.remove('open');
