@@ -6,6 +6,41 @@
 
 .frame-diamond { border: 3px solid #06b6d4 !important; box-shadow: 0 0 12px rgba(6, 182, 212, 0.9); }
 
+@keyframes frostGlow {
+    0%, 100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(125, 211, 252, 0.9); }
+}
+.frame-frost { border: 3px solid #38bdf8 !important; animation: frostGlow 3s ease-in-out infinite; }
+
+@keyframes magmaBurn {
+    0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); filter: brightness(1); }
+    50% { box-shadow: 0 0 25px rgba(249, 115, 22, 1); filter: brightness(1.25); }
+}
+.frame-inferno { border: 3px solid #ef4444 !important; animation: magmaBurn 1.8s ease-in-out infinite; }
+
+@keyframes amethystShimmer {
+    0%, 100% { box-shadow: 0 0 12px rgba(192, 132, 252, 0.6); transform: scale(1); }
+    50% { box-shadow: 0 0 22px rgba(232, 121, 249, 0.9); transform: scale(1.02); }
+}
+.frame-amethyst { border: 3px solid #c084fc !important; animation: amethystShimmer 2.5s ease-in-out infinite; }
+
+@keyframes cyberPulse {
+    0% { box-shadow: 0 0 8px #f43f5e, inset 0 0 8px #38bdf8; }
+    50% { box-shadow: 0 0 18px #38bdf8, inset 0 0 18px #f43f5e; }
+    100% { box-shadow: 0 0 8px #f43f5e, inset 0 0 8px #38bdf8; }
+}
+.frame-cyberpunk { border: 3px solid #f43f5e !important; animation: cyberPulse 2s ease-in-out infinite; }
+
+@keyframes chronoHolo {
+    0% { filter: hue-rotate(0deg) drop-shadow(0 0 6px #facc15); transform: scale(1); }
+    50% { filter: hue-rotate(180deg) drop-shadow(0 0 16px #38bdf8); transform: scale(1.05); }
+    100% { filter: hue-rotate(360deg) drop-shadow(0 0 6px #f43f5e); transform: scale(1); }
+}
+.frame-event-tomorrow {
+    border: 3px dashed #facc15 !important;
+    animation: chronoHolo 2.5s linear infinite;
+}
+
 @keyframes staticRgbPulse {
     0% {
         transform: scale(1);
