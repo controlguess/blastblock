@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blast Block</title>
-
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -23,6 +22,7 @@
             transition: background 0.5s ease;
         }
 
+        /* Themes */
         body.theme-neon { background: radial-gradient(circle at center, #2d0036 0%, #050014 100%); }
         body.theme-emerald { background: radial-gradient(circle at center, #064e3b 0%, #022c22 100%); }
         body.theme-sunset { background: radial-gradient(circle at center, #7c2d12 0%, #450a0a 100%); }
@@ -66,7 +66,7 @@
         .frame-diamond { border: 3px solid #06b6d4 !important; box-shadow: 0 0 12px rgba(6, 182, 212, 0.9); }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden text-white flex justify-center items-center">
+<body class="min-h-screen w-full overflow-y-auto text-white flex justify-center items-center py-4 lg:py-0">
 
     <div class="fixed top-2 right-4 z-[60]">
         <button id="btn-toggle-menu" title="Toggle Menu" class="h-8 lg:h-11 px-3.5 rounded-xl glass-panel flex items-center gap-2 text-cyan-300 hover:text-white active:scale-95 transition text-xs lg:text-sm font-bold border border-white/15 shadow-lg">
@@ -97,86 +97,87 @@
         </button>
     </div>
 
-    <div class="w-full h-full max-w-7xl flex flex-col lg:flex-row items-center justify-between p-4 lg:p-8 gap-6">
-        <div class="flex flex-col w-72 h-full justify-between gap-4">
-            <div class="glass-panel p-6 rounded-3xl flex flex-col items-center justify-center text-center">
-                <div class="flex items-center gap-3 mb-2">
-                    <div class="w-10 h-10 rounded-md color-cyan flex items-center justify-center shadow-lg border border-white/40"><i class="fa-solid fa-cubes text-xl text-white drop-shadow"></i></div>
-                    <h1 class="text-3xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-yellow-300 to-pink-500">BLAST BLOCK</h1>
+    <div class="w-full max-w-7xl flex flex-col lg:flex-row items-center justify-center lg:justify-between p-4 lg:p-8 gap-6 my-auto">
+        
+        <div class="flex flex-col w-full max-w-md lg:w-72 justify-between gap-4">
+            <div class="glass-panel p-5 lg:p-6 rounded-3xl flex flex-col items-center justify-center text-center">
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="w-9 h-9 rounded-md color-cyan flex items-center justify-center shadow-lg border border-white/40"><i class="fa-solid fa-cubes text-lg text-white drop-shadow"></i></div>
+                    <h1 class="text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-yellow-300 to-pink-500">BLAST BLOCK</h1>
                 </div>
-                <p class="text-xs text-cyan-300/80 font-bold tracking-widest uppercase">Early Access</p>
+                <p class="text-[10px] text-cyan-300/80 font-bold tracking-widest uppercase">Early Access</p>
             </div>
 
-            <div class="glass-panel p-6 rounded-3xl flex flex-col gap-4">
-                <div class="flex justify-between items-center border-b border-white/10 pb-3">
-                    <span class="text-slate-300 text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-coins text-yellow-400"></i> Coins</span>
-                    <span id="stat-coins" class="text-2xl font-black text-yellow-300">0</span>
+            <div class="glass-panel p-5 lg:p-6 rounded-3xl flex flex-col gap-3">
+                <div class="flex justify-between items-center border-b border-white/10 pb-2.5">
+                    <span class="text-slate-300 text-xs lg:text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-coins text-yellow-400"></i> Coins</span>
+                    <span id="stat-coins" class="text-xl lg:text-2xl font-black text-yellow-300">0</span>
                 </div>
-                <div class="flex justify-between items-center border-b border-white/10 pb-3">
-                    <span class="text-slate-300 text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-fire text-amber-400"></i> Max Streak</span>
-                    <span id="stat-max-streak" class="text-2xl font-black text-amber-300">0</span>
+                <div class="flex justify-between items-center border-b border-white/10 pb-2.5">
+                    <span class="text-slate-300 text-xs lg:text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-fire text-amber-400"></i> Max Streak</span>
+                    <span id="stat-max-streak" class="text-xl lg:text-2xl font-black text-amber-300">0</span>
                 </div>
-                <div class="flex justify-between items-center border-b border-white/10 pb-3">
-                    <span class="text-slate-300 text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-bolt text-cyan-400"></i> Lines Cleared</span>
-                    <span id="stat-lines-cleared" class="text-2xl font-black text-cyan-300">0</span>
+                <div class="flex justify-between items-center border-b border-white/10 pb-2.5">
+                    <span class="text-slate-300 text-xs lg:text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-bolt text-cyan-400"></i> Lines Cleared</span>
+                    <span id="stat-lines-cleared" class="text-xl lg:text-2xl font-black text-cyan-300">0</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-300 text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-cubes-stacked text-purple-400"></i> Blocks Placed</span>
-                    <span id="stat-blocks-placed" class="text-2xl font-black text-purple-300">0</span>
+                    <span class="text-slate-300 text-xs lg:text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-cubes-stacked text-purple-400"></i> Blocks Placed</span>
+                    <span id="stat-blocks-placed" class="text-xl lg:text-2xl font-black text-purple-300">0</span>
                 </div>
             </div>
 
-            <div class="glass-panel p-5 rounded-3xl flex items-center justify-between">
-                <span class="text-sm font-bold text-slate-200 flex items-center gap-2"><i class="fa-solid fa-volume-high text-indigo-400"></i> Sound FX</span>
+            <div class="glass-panel p-4 lg:p-5 rounded-3xl flex items-center justify-between">
+                <span class="text-xs lg:text-sm font-bold text-slate-200 flex items-center gap-2"><i class="fa-solid fa-volume-high text-indigo-400"></i> Sound FX</span>
                 <button id="btn-sound-toggle" class="w-12 h-6 bg-indigo-600 rounded-full p-1 flex items-center transition-colors">
                     <div id="sound-toggle-dot" class="w-4 h-4 bg-white rounded-full translate-x-6 transition-transform shadow"></div>
                 </button>
             </div>
         </div>
 
-        <div class="flex-1 h-full flex flex-col items-center justify-between max-w-md lg:max-w-lg w-full py-2 lg:py-4">
-            <div class="w-full flex items-center justify-between px-6 py-3 glass-panel rounded-3xl border border-white/15">
+        <div class="flex-1 flex flex-col items-center justify-center max-w-md lg:max-w-lg w-full gap-4">
+            <div class="w-full flex items-center justify-between px-5 py-3 glass-panel rounded-3xl border border-white/15">
                 <div class="flex flex-col items-start">
-                    <span class="text-xs font-black text-amber-400/90 uppercase tracking-widest flex items-center gap-1"><i class="fa-solid fa-trophy text-amber-400 text-xs"></i> Best</span>
-                    <span id="high-score-display" class="text-2xl lg:text-3xl font-black text-amber-300 tracking-wide">0</span>
+                    <span class="text-[10px] lg:text-xs font-black text-amber-400/90 uppercase tracking-widest flex items-center gap-1"><i class="fa-solid fa-trophy text-amber-400 text-[10px]"></i> Best</span>
+                    <span id="high-score-display" class="text-xl lg:text-3xl font-black text-amber-300 tracking-wide">0</span>
                 </div>
                 <div class="flex flex-col items-center">
-                    <span class="text-xs font-black text-slate-300 uppercase tracking-widest">Score</span>
-                    <span id="score-display" class="text-4xl lg:text-6xl font-black text-white tracking-wider drop-shadow-md">0</span>
+                    <span class="text-[10px] lg:text-xs font-black text-slate-300 uppercase tracking-widest">Score</span>
+                    <span id="score-display" class="text-3xl lg:text-5xl font-black text-white tracking-wider drop-shadow-md">0</span>
                 </div>
                 <div class="flex flex-col items-end">
-                    <span class="text-xs font-black text-orange-400/90 uppercase tracking-widest flex items-center gap-1">Streak <i class="fa-solid fa-bolt text-orange-400"></i></span>
+                    <span class="text-[10px] lg:text-xs font-black text-orange-400/90 uppercase tracking-widest flex items-center gap-1">Streak <i class="fa-solid fa-bolt text-orange-400"></i></span>
                     <div class="flex items-center gap-1">
-                        <span id="streak-display" class="text-2xl lg:text-3xl font-black text-orange-400">0</span>
+                        <span id="streak-display" class="text-xl lg:text-3xl font-black text-orange-400">0</span>
                         <span class="text-xs text-orange-400 font-bold">x</span>
                     </div>
                 </div>
             </div>
 
-            <div class="relative w-full aspect-square p-2.5 glass-panel rounded-3xl shadow-2xl border-2 border-cyan-500/30 flex items-center justify-center my-auto overflow-hidden">
+            <div class="relative w-full aspect-square p-2.5 glass-panel rounded-3xl shadow-2xl border-2 border-cyan-500/30 flex items-center justify-center overflow-hidden">
                 <canvas id="particle-canvas"></canvas>
                 <div id="grid-container" class="grid grid-cols-8 grid-rows-8 gap-1 w-full h-full relative z-10"></div>
                 <div id="combo-floating-container" class="absolute inset-0 pointer-events-none flex items-center justify-center z-30"></div>
             </div>
 
-            <div class="w-full glass-panel rounded-3xl p-3 flex items-center justify-around h-36 relative border border-white/15">
-                <div class="dock-slot w-28 h-28 flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="0"></div>
-                <div class="dock-slot w-28 h-28 flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="1"></div>
-                <div class="dock-slot w-28 h-28 flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="2"></div>
+            <div class="w-full glass-panel rounded-3xl p-3 flex items-center justify-around h-28 lg:h-36 relative border border-white/15">
+                <div class="dock-slot w-20 lg:w-28 h-20 lg:h-28 flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="0"></div>
+                <div class="dock-slot w-20 lg:w-28 h-20 lg:h-28 flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="1"></div>
+                <div class="dock-slot w-20 lg:w-28 h-20 lg:h-28 flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="2"></div>
             </div>
         </div>
 
-        <div class="flex flex-col w-72 h-full justify-between gap-4">
-            <div class="glass-panel p-6 rounded-3xl flex flex-col gap-3">
-                <h3 class="text-base font-black text-slate-100 border-b border-white/10 pb-2 flex items-center gap-2"><i class="fa-solid fa-gamepad text-cyan-400"></i> Controls & Rules</h3>
-                <ul class="text-xs text-slate-300 space-y-3 leading-relaxed">
+        <div class="flex flex-col w-full max-w-md lg:w-72 justify-between gap-4">
+            <div class="glass-panel p-5 lg:p-6 rounded-3xl flex flex-col gap-3">
+                <h3 class="text-sm font-black text-slate-100 border-b border-white/10 pb-2 flex items-center gap-2"><i class="fa-solid fa-gamepad text-cyan-400"></i> Controls & Rules</h3>
+                <ul class="text-xs text-slate-300 space-y-2 lg:space-y-3 leading-relaxed">
                     <li class="flex items-start gap-2"><span class="bg-cyan-500/30 text-cyan-300 rounded px-1.5 py-0.5 font-bold">1</span><span>Drag shapes onto the grid to form full lines.</span></li>
                     <li class="flex items-start gap-2"><span class="bg-cyan-500/30 text-cyan-300 rounded px-1.5 py-0.5 font-bold">2</span><span>Clear rows or columns to make room and score points.</span></li>
                     <li class="flex items-start gap-2"><span class="bg-amber-500/30 text-amber-300 rounded px-1.5 py-0.5 font-bold">3</span><span>Clear back-to-back lines for <strong class="text-amber-300">Mega Combos</strong>!</span></li>
                 </ul>
             </div>
-            <div class="glass-panel p-6 rounded-3xl flex flex-col items-center justify-center gap-4">
-                <button id="btn-restart-game" class="w-full py-4 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 active:scale-95 transition font-black rounded-2xl shadow-xl flex items-center justify-center gap-2 text-sm tracking-wider uppercase">
+            <div class="glass-panel p-5 lg:p-6 rounded-3xl flex flex-col items-center justify-center gap-4">
+                <button id="btn-restart-game" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 active:scale-95 transition font-black rounded-2xl shadow-xl flex items-center justify-center gap-2 text-xs lg:text-sm tracking-wider uppercase">
                     <i class="fa-solid fa-rotate-right"></i> Restart Game
                 </button>
             </div>
