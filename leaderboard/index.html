@@ -98,9 +98,9 @@
     <script>
         let currentTab = 'high_score';
         let cachedLeaderboardData = [];
-        const currentUserId = localStorage.getItem('blast_block_token') ? getUserIdFromToken() : null;
+        let currentUserId = null;
 
-        function getUserIdFromToken() {
+        function getVerifiedUserId() {
             try {
                 const profile = JSON.parse(localStorage.getItem('blast_block_profile') || '{}');
                 return profile.id || null;
@@ -123,7 +123,7 @@
                 const json = await res.json();
                 cachedLeaderboardData = json.data || json.leaderboard || [];
             } catch (err) {
-                cachedLeaderboardData = generateDemoLeaderboard();
+                cachedLeaderboardData = [];
             } finally {
                 renderLeaderboard();
                 showLoading(false);
@@ -192,10 +192,10 @@
                     <div class="absolute -top-3.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border ${borderColor} flex items-center justify-center shadow-lg">
                         <i class="fa-solid ${crownIcons[rank]}"></i>
                     </div>
-                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden relative mt-3 mb-2 shrink-0 ${frameClass}" style="border-radius: 50%;">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden mt-3 mb-2 shrink-0 ${frameClass}">
                         ${player.avatar_url 
-                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover rounded-full" alt="Avatar">`
-                            : `<div class="w-full h-full bg-slate-700 flex items-center justify-center rounded-full"><i class="fa-solid fa-user text-lg sm:text-2xl text-slate-400"></i></div>`
+                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover" alt="Avatar">`
+                            : `<i class="fa-solid fa-user text-lg sm:text-2xl text-slate-400"></i>`
                         }
                     </div>
                     <h3 class="font-black text-xs sm:text-sm text-white truncate w-full">${player.username || 'Anonymous'}</h3>
@@ -223,10 +223,10 @@
             row.innerHTML = `
                 <div class="flex items-center gap-3 min-w-0">
                     <span class="w-7 text-center font-black text-xs sm:text-sm text-slate-400">#${rank}</span>
-                    <div class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden relative shrink-0 ${frameClass}" style="border-radius: 50%;">
+                    <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 ${frameClass}">
                         ${player.avatar_url 
-                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover rounded-full" alt="Avatar">`
-                            : `<div class="w-full h-full bg-slate-700 flex items-center justify-center rounded-full"><i class="fa-solid fa-user text-xs text-slate-400"></i></div>`
+                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover" alt="Avatar">`
+                            : `<i class="fa-solid fa-user text-xs text-slate-400"></i>`
                         }
                     </div>
                     <span class="font-bold text-xs sm:text-sm text-slate-200 truncate ${isCurrentUser ? 'text-cyan-300 font-black' : ''}">
@@ -258,20 +258,12 @@
             renderLeaderboard();
         });
 
-        function generateDemoLeaderboard() {
-            return [
-                { id: '1', username: 'BlockMaster', high_score: 42500, highest_streak: 18, avatar_url: '', active_frame: 'frame-dev-rgb' },
-                { id: '2', username: 'PixelKnight', high_score: 38200, highest_streak: 14, avatar_url: '', active_frame: 'frame-gold' },
-                { id: '3', username: 'BlastKing', high_score: 31900, highest_streak: 22, avatar_url: '', active_frame: 'frame-matrix' },
-                { id: '4', username: 'GridRunner', high_score: 27400, highest_streak: 11, avatar_url: '', active_frame: 'frame-neon' },
-                { id: '5', username: 'CubeDestroyer', high_score: 24100, highest_streak: 9, avatar_url: '', active_frame: 'frame-solar' },
-                { id: '6', username: 'ComboGod', high_score: 19800, highest_streak: 15, avatar_url: '', active_frame: 'frame-void' },
-                { id: '7', username: 'NeoMatrix', high_score: 16500, highest_streak: 8, avatar_url: '', active_frame: 'frame-glitch' },
-                { id: '8', username: 'ShadowBlock', high_score: 12400, highest_streak: 6, avatar_url: '', active_frame: 'frame-diamond' }
-            ];
+        async function init() {
+            currentUserId = getVerifiedUserId();
+            await fetchLeaderboard();
         }
 
-        window.onload = fetchLeaderboard;
+        window.onload = init;
     </script>
 </body>
 </html>
