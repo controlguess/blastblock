@@ -3,72 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>System Administration Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background: #0b0f19; color: #e2e8f0; }
+        .panel { background: #111827; border: 1px solid #1f2937; }
+        .input-field { background: #030712; border: 1px solid #374151; color: #fff; }
+        .input-field:focus { border-color: #3b82f6; outline: none; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+    <header class="panel border-b px-6 py-3.5 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <div class="bg-red-500/10 border border-red-500/30 text-red-400 p-2 rounded-lg text-sm font-bold">ADMIN</div>
-            <h1 class="font-bold text-lg tracking-tight">System Control Panel</h1>
+            <div class="bg-blue-600/10 border border-blue-500/30 text-blue-400 px-2.5 py-1 rounded text-xs font-bold font-mono">SYS_ADMIN</div>
+            <h1 class="font-semibold text-sm tracking-tight text-white">Infrastructure Control Panel</h1>
         </div>
-        <a href="/" class="text-xs text-slate-400 hover:text-white transition flex items-center gap-1.5 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-            <i class="fa-solid fa-arrow-left"></i> Exit to Site
-        </a>
+        <div class="flex items-center gap-3">
+            <span id="admin-user-email" class="text-xs text-slate-400 font-mono"></span>
+            <a href="/" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded border border-slate-700 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-left"></i> Exit Dashboard
+            </a>
+        </div>
     </header>
 
-    <main class="flex-1 max-w-6xl w-full mx-auto p-6 flex flex-col gap-6">
-        <div id="unauthorized-banner" class="hidden bg-red-950/50 border border-red-800 p-4 rounded-xl text-red-200 text-sm">
-            Access denied. You do not possess administrator credentials.
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 flex flex-col gap-6">
+        
+        <div id="unauthorized-banner" class="hidden bg-red-950/40 border border-red-800/60 p-4 rounded-lg text-red-300 text-xs flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-base"></i>
+            <span>Access denied. Administrative privileges are required to view this panel.</span>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col gap-1">
-                <span class="text-xs text-slate-400 font-medium">System Status</span>
-                <span class="text-lg font-bold text-emerald-400 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div> Operational</span>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="panel p-4 rounded-lg flex flex-col gap-1">
+                <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wider">System State</span>
+                <span class="text-sm font-semibold text-emerald-400 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div> Nominal</span>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col gap-1">
-                <span class="text-xs text-slate-400 font-medium">Database Connection</span>
-                <span class="text-lg font-bold text-slate-200">Supabase Connected</span>
+            <div class="panel p-4 rounded-lg flex flex-col gap-1">
+                <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Database Link</span>
+                <span class="text-sm font-semibold text-slate-200">Supabase Connected</span>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col gap-1">
-                <span class="text-xs text-slate-400 font-medium">Auth Verification</span>
-                <span id="auth-status-label" class="text-lg font-bold text-amber-400">Verifying...</span>
+            <div class="panel p-4 rounded-lg flex flex-col gap-1">
+                <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Session Token</span>
+                <span class="text-sm font-semibold text-blue-400 font-mono">Bearer Active</span>
+            </div>
+            <div class="panel p-4 rounded-lg flex flex-col gap-1">
+                <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Authorization</span>
+                <span id="auth-status-label" class="text-sm font-semibold text-amber-400">Authenticating...</span>
             </div>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col">
-            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-                <h2 class="font-semibold text-sm">User Directory & Permissions</h2>
-                <button onclick="loadUsers()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">Refresh List</button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-950/50 text-slate-400 uppercase tracking-wider border-b border-slate-800">
-                        <tr>
-                            <th class="px-6 py-3">User ID</th>
-                            <th class="px-6 py-3">Username</th>
-                            <th class="px-6 py-3">High Score</th>
-                            <th class="px-6 py-3">Coins</th>
-                            <th class="px-6 py-3">Admin Status</th>
-                            <th class="px-6 py-3 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table-body" class="divide-y divide-slate-800">
-                        <tr><td colspan="6" class="px-6 py-8 text-center text-slate-500">Loading user accounts...</td></tr>
-                    </tbody>
-                </table>
+        <div class="flex border-b border-slate-800 gap-2">
+            <button onclick="switchTab('users')" id="tab-btn-users" class="px-4 py-2 text-xs font-semibold border-b-2 border-blue-500 text-blue-400 transition">User Management</button>
+            <button onclick="switchTab('catalog')" id="tab-btn-catalog" class="px-4 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">Shop & Catalog Manager</button>
+        </div>
+
+        <div id="tab-users" class="flex flex-col gap-6">
+            <div class="panel rounded-lg overflow-hidden flex flex-col">
+                <div class="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+                    <h2 class="font-semibold text-xs text-slate-200 uppercase tracking-wider">Registered Accounts</h2>
+                    <button onclick="loadDashboardData()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded border border-slate-700 transition">Refresh Directory</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 font-mono text-[10px]">
+                            <tr>
+                                <th class="px-5 py-3">User ID</th>
+                                <th class="px-5 py-3">Username</th>
+                                <th class="px-5 py-3">High Score</th>
+                                <th class="px-5 py-3">Coins</th>
+                                <th class="px-5 py-3">Role</th>
+                                <th class="px-5 py-3 text-right">Permissions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body" class="divide-y divide-slate-800/60">
+                            <tr><td colspan="6" class="px-5 py-8 text-center text-slate-500 font-mono">Fetching account directory...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+
+        <div id="tab-catalog" class="flex flex-col gap-6 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="panel p-5 rounded-lg flex flex-col gap-4">
+                    <h2 class="font-semibold text-xs text-slate-200 uppercase tracking-wider border-b border-slate-800 pb-2">Create Catalog Item</h2>
+                    <form id="create-item-form" class="flex flex-col gap-3.5 text-xs">
+                        <div>
+                            <label class="text-[11px] text-slate-400 font-medium">Item Type</label>
+                            <select id="item-type" class="input-field w-full px-3 py-2 rounded mt-1">
+                                <option value="frames">Profile Frame (`shop_frames`)</option>
+                                <option value="themes">Game Theme (`shop_themes`)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 font-medium">Item ID (slug)</label>
+                            <input id="item-id" type="text" placeholder="e.g. frame-gold" class="input-field w-full px-3 py-2 rounded mt-1 font-mono" required>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 font-medium">Display Name</label>
+                            <input id="item-name" type="text" placeholder="e.g. Golden Aura" class="input-field w-full px-3 py-2 rounded mt-1" required>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 font-medium">CSS Class Name</label>
+                            <input id="item-css" type="text" placeholder="e.g. frame-gold" class="input-field w-full px-3 py-2 rounded mt-1 font-mono" required>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 font-medium">Base Price (Coins)</label>
+                            <input id="item-cost" type="number" placeholder="200" class="input-field w-full px-3 py-2 rounded mt-1" required>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 font-semibold rounded text-white transition mt-1">Publish to Database</button>
+                    </form>
+                </div>
+
+                <div class="panel rounded-lg overflow-hidden flex flex-col lg:col-span-2">
+                    <div class="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+                        <h2 class="font-semibold text-xs text-slate-200 uppercase tracking-wider">Active Shop Inventory</h2>
+                        <button onclick="loadCatalog()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded border border-slate-700 transition">Reload Catalog</button>
+                    </div>
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800 font-mono text-[10px]">
+                                <tr>
+                                    <th class="px-5 py-3">Table / Type</th>
+                                    <th class="px-5 py-3">Identifier</th>
+                                    <th class="px-5 py-3">Name</th>
+                                    <th class="px-5 py-3">Price</th>
+                                    <th class="px-5 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="catalog-table-body" class="divide-y divide-slate-800/60">
+                                <tr><td colspan="5" class="px-5 py-8 text-center text-slate-500 font-mono">Loading store catalog...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
+        function switchTab(tab) {
+            const usersTab = document.getElementById('tab-users');
+            const catalogTab = document.getElementById('tab-catalog');
+            const btnUsers = document.getElementById('tab-btn-users');
+            const btnCatalog = document.getElementById('tab-btn-catalog');
+
+            if (tab === 'users') {
+                usersTab.classList.remove('hidden');
+                catalogTab.classList.add('hidden');
+                btnUsers.className = 'px-4 py-2 text-xs font-semibold border-b-2 border-blue-500 text-blue-400 transition';
+                btnCatalog.className = 'px-4 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition';
+            } else {
+                usersTab.classList.add('hidden');
+                catalogTab.classList.remove('hidden');
+                btnCatalog.className = 'px-4 py-2 text-xs font-semibold border-b-2 border-blue-500 text-blue-400 transition';
+                btnUsers.className = 'px-4 py-2 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition';
+                loadCatalog();
+            }
+        }
+
         async function verifyAdmin() {
             const token = localStorage.getItem('blast_block_token');
             if (!token) {
@@ -77,21 +174,22 @@
             }
 
             try {
-                const res = await fetch('https://testing.blastblock.space/api/admin?type=users', {
+                const res = await fetch('/api/admin?type=dashboard', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
                 if (!res.ok) {
                     document.getElementById('unauthorized-banner').classList.remove('hidden');
-                    document.getElementById('auth-status-label').textContent = 'Unauthorized';
-                    document.getElementById('auth-status-label').className = 'text-lg font-bold text-red-400';
+                    document.getElementById('auth-status-label').textContent = 'Access Denied';
+                    document.getElementById('auth-status-label').className = 'text-sm font-semibold text-red-400';
                     return;
                 }
 
                 const json = await res.json();
                 if (json.success) {
-                    document.getElementById('auth-status-label').textContent = 'Verified Admin';
-                    document.getElementById('auth-status-label').className = 'text-lg font-bold text-emerald-400';
+                    document.getElementById('auth-status-label').textContent = 'Verified Administrator';
+                    document.getElementById('auth-status-label').className = 'text-sm font-semibold text-emerald-400';
+                    if (json.email) document.getElementById('admin-user-email').textContent = json.email;
                     renderUsers(json.users);
                 }
             } catch (err) {
@@ -99,7 +197,7 @@
             }
         }
 
-        async function loadUsers() {
+        async function loadDashboardData() {
             verifyAdmin();
         }
 
@@ -108,26 +206,26 @@
             tbody.innerHTML = '';
 
             if (!users || users.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">No users found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="px-5 py-6 text-center text-slate-500 font-mono">No accounts recorded.</td></tr>`;
                 return;
             }
 
             users.forEach(user => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/50 transition';
+                tr.className = 'hover:bg-slate-800/40 transition';
                 tr.innerHTML = `
-                    <td class="px-6 py-4 font-mono text-slate-500">${user.id.substring(0, 12)}...</td>
-                    <td class="px-6 py-4 font-medium text-slate-200">${user.username || 'Anonymous'}</td>
-                    <td class="px-6 py-4 text-amber-400 font-semibold">${(user.high_score || 0).toLocaleString()}</td>
-                    <td class="px-6 py-4 text-yellow-400 font-semibold">${(user.coins || 0).toLocaleString()}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded text-[10px] font-bold ${user.is_admin ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
+                    <td class="px-5 py-3 font-mono text-slate-500">${user.id.substring(0, 10)}...</td>
+                    <td class="px-5 py-3 font-medium text-slate-200">${user.username || 'Anonymous'}</td>
+                    <td class="px-5 py-3 text-amber-400 font-semibold">${(user.high_score || 0).toLocaleString()}</td>
+                    <td class="px-5 py-3 text-yellow-400 font-semibold">${(user.coins || 0).toLocaleString()}</td>
+                    <td class="px-5 py-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold ${user.is_admin ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
                             ${user.is_admin ? 'ADMIN' : 'STANDARD'}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="toggleAdmin('${user.id}', ${!user.is_admin})" class="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition font-medium">
-                            ${user.is_admin ? 'Revoke Admin' : 'Make Admin'}
+                    <td class="px-5 py-3 text-right">
+                        <button onclick="toggleAdmin('${user.id}', ${!user.is_admin})" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition font-medium">
+                            ${user.is_admin ? 'Revoke Admin' : 'Grant Admin'}
                         </button>
                     </td>
                 `;
@@ -138,26 +236,124 @@
         async function toggleAdmin(targetUserId, makeAdmin) {
             const token = localStorage.getItem('blast_block_token');
             try {
-                const res = await fetch('https://testing.blastblock.space/api/admin', {
+                const res = await fetch('/api/admin', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        action: 'update_user_admin',
-                        targetUserId: targetUserId,
-                        isAdmin: makeAdmin
-                    })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ action: 'update_user_admin', targetUserId, isAdmin: makeAdmin })
+                });
+                const json = await res.json();
+                if (json.success) loadDashboardData();
+                else alert(json.error || 'Failed to modify role');
+            } catch (err) {
+                alert('Connection failure');
+            }
+        }
+
+        async function loadCatalog() {
+            const token = localStorage.getItem('blast_block_token');
+            try {
+                const res = await fetch('/api/admin?type=catalog', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const json = await res.json();
+                if (json.success) renderCatalog(json.catalog);
+            } catch (err) {
+                console.error('Failed to load catalog');
+            }
+        }
+
+        function renderCatalog(catalog) {
+            const tbody = document.getElementById('catalog-table-body');
+            tbody.innerHTML = '';
+
+            if (!catalog || catalog.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-5 py-6 text-center text-slate-500 font-mono">No catalog items configured.</td></tr>`;
+                return;
+            }
+
+            catalog.forEach(item => {
+                const isOffsale = item.cost === -5;
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.innerHTML = `
+                    <td class="px-5 py-3 uppercase font-mono text-[10px] text-slate-400">${item.item_type}</td>
+                    <td class="px-5 py-3 font-mono text-slate-300">${item.id}</td>
+                    <td class="px-5 py-3 font-medium text-slate-200">${item.name}</td>
+                    <td class="px-5 py-3 font-mono ${isOffsale ? 'text-red-400 font-bold' : 'text-yellow-400'}">
+                        ${isOffsale ? 'OFFSALE (-5)' : `${item.cost} Coins`}
+                    </td>
+                    <td class="px-5 py-3 text-right flex items-center justify-end gap-2">
+                        <button onclick="setCatalogPrice('${item.item_type}', '${item.id}', ${isOffsale ? 100 : -5})" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 ${isOffsale ? 'text-emerald-400 border-emerald-500/30' : 'text-red-400 border-red-500/30'} border transition text-[11px] font-medium">
+                            ${isOffsale ? 'Restore Sale' : 'Make Offsale'}
+                        </button>
+                        <button onclick="deleteCatalogItem('${item.item_type}', '${item.id}')" class="px-2 py-1 rounded bg-red-950/40 hover:bg-red-900/50 text-red-300 border border-red-800/50 transition text-[11px]">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('create-item-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('blast_block_token');
+            const itemType = document.getElementById('item-type').value;
+            const payload = {
+                action: 'create_catalog_item',
+                itemType: itemType,
+                id: document.getElementById('item-id').value.trim(),
+                name: document.getElementById('item-name').value.trim(),
+                css_class: document.getElementById('item-css').value.trim(),
+                cost: parseInt(document.getElementById('item-cost').value, 10) || 0
+            };
+
+            try {
+                const res = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload)
                 });
                 const json = await res.json();
                 if (json.success) {
-                    loadUsers();
+                    document.getElementById('create-item-form').reset();
+                    loadCatalog();
                 } else {
-                    alert(json.error || 'Failed to update user role');
+                    alert(json.error || 'Failed to create item');
                 }
             } catch (err) {
-                alert('Network connection error');
+                alert('Connection failure');
+            }
+        });
+
+        async function setCatalogPrice(itemType, itemId, newCost) {
+            const token = localStorage.getItem('blast_block_token');
+            try {
+                const res = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ action: 'update_catalog_cost', itemType, id: itemId, cost: newCost })
+                });
+                const json = await res.json();
+                if (json.success) loadCatalog();
+            } catch (err) {
+                alert('Connection failure');
+            }
+        }
+
+        async function deleteCatalogItem(itemType, itemId) {
+            if (!confirm(`Are you sure you want to delete item "${itemId}"?`)) return;
+            const token = localStorage.getItem('blast_block_token');
+            try {
+                const res = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ action: 'delete_catalog_item', itemType, id: itemId })
+                });
+                const json = await res.json();
+                if (json.success) loadCatalog();
+            } catch (err) {
+                alert('Connection failure');
             }
         }
 
