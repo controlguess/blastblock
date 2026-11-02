@@ -174,7 +174,7 @@
             }
 
             try {
-                const res = await fetch('/api/admin?type=dashboard', {
+                const res = await fetch('https://testing.blastblock.space/api/admin?type=dashboard', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
@@ -236,7 +236,7 @@
         async function toggleAdmin(targetUserId, makeAdmin) {
             const token = localStorage.getItem('blast_block_token');
             try {
-                const res = await fetch('/api/admin', {
+                const res = await fetch('https://testing.blastblock.space/api/admin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ action: 'update_user_admin', targetUserId, isAdmin: makeAdmin })
@@ -252,7 +252,7 @@
         async function loadCatalog() {
             const token = localStorage.getItem('blast_block_token');
             try {
-                const res = await fetch('/api/admin?type=catalog', {
+                const res = await fetch('https://testing.blastblock.space/api/admin?type=catalog', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const json = await res.json();
@@ -309,7 +309,7 @@
             };
 
             try {
-                const res = await fetch('/api/admin', {
+                const res = await fetch('https://testing.blastblock.space/api/admin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(payload)
@@ -329,7 +329,7 @@
         async function setCatalogPrice(itemType, itemId, newCost) {
             const token = localStorage.getItem('blast_block_token');
             try {
-                const res = await fetch('/api/admin', {
+                const res = await fetch('https://testing.blastblock.space/api/admin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ action: 'update_catalog_cost', itemType, id: itemId, cost: newCost })
@@ -345,7 +345,7 @@
             if (!confirm(`Are you sure you want to delete item "${itemId}"?`)) return;
             const token = localStorage.getItem('blast_block_token');
             try {
-                const res = await fetch('/api/admin', {
+                const res = await fetch('https://testing.blastblock.space/api/admin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ action: 'delete_catalog_item', itemType, id: itemId })
