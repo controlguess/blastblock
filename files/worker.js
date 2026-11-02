@@ -176,48 +176,48 @@ const shopCoinsDisplay = document.getElementById('shop-coins-display');
 let activeShopTab = 'themes';
 let activeShopSubTab = 'store';
 
-btnToggleMenu?.addEventListener('click', (e) => {
+btnToggleMenu??.addEventListener('click', (e) => {
     e.stopPropagation();
     topSlideMenu.classList.toggle('open');
     topSlideMenu.classList.toggle('closed');
 });
 
-window.addEventListener('click', (e) => {
+window?.addEventListener('click', (e) => {
     if (!topSlideMenu.contains(e.target) && !btnToggleMenu.contains(e.target)) {
         topSlideMenu.classList.add('closed');
         topSlideMenu.classList.remove('open');
     }
 });
 
-btnShop.addEventListener('click', () => {
+btnShop?.addEventListener('click', () => {
     shopModal.classList.remove('hidden');
     renderShopItems();
 });
-shopClose.addEventListener('click', () => shopModal.classList.add('hidden'));
-shopModal.addEventListener('click', e => { if (e.target === shopModal) shopModal.classList.add('hidden'); });
+shopClose?.addEventListener('click', () => shopModal.classList.add('hidden'));
+shopModal?.addEventListener('click', e => { if (e.target === shopModal) shopModal.classList.add('hidden'); });
 
-shopTabThemes.addEventListener('click', () => {
+shopTabThemes?.addEventListener('click', () => {
     activeShopTab = 'themes';
     shopTabThemes.className = 'flex-1 py-1.5 font-bold text-xs rounded-lg bg-emerald-500/30 text-emerald-300 transition';
     shopTabFrames.className = 'flex-1 py-1.5 font-bold text-xs text-slate-400 rounded-lg transition';
     renderShopItems();
 });
 
-shopTabFrames.addEventListener('click', () => {
+shopTabFrames?.addEventListener('click', () => {
     activeShopTab = 'frames';
     shopTabFrames.className = 'flex-1 py-1.5 font-bold text-xs rounded-lg bg-emerald-500/30 text-emerald-300 transition';
     shopTabThemes.className = 'flex-1 py-1.5 font-bold text-xs text-slate-400 rounded-lg transition';
     renderShopItems();
 });
 
-shopSubtabStore.addEventListener('click', () => {
+shopSubtabStore?.addEventListener('click', () => {
     activeShopSubTab = 'store';
     shopSubtabStore.className = 'flex-1 py-1 font-bold rounded-lg bg-cyan-500/30 text-cyan-300 transition';
     shopSubtabInventory.className = 'flex-1 py-1 font-bold rounded-lg text-slate-400 transition';
     renderShopItems();
 });
 
-shopSubtabInventory.addEventListener('click', () => {
+shopSubtabInventory?.addEventListener('click', () => {
     activeShopSubTab = 'inventory';
     shopSubtabInventory.className = 'flex-1 py-1 font-bold rounded-lg bg-cyan-500/30 text-cyan-300 transition';
     shopSubtabStore.className = 'flex-1 py-1 font-bold rounded-lg text-slate-400 transition';
@@ -280,7 +280,7 @@ function renderShopItems() {
 
         const btn = card.querySelector('.shop-item-btn');
         if (!isEquipped) {
-            btn.addEventListener('click', () => handleShopAction(item, isOwned));
+            btn?.addEventListener('click', () => handleShopAction(item, isOwned));
         }
 
         shopItemsContainer.appendChild(card);
@@ -346,7 +346,7 @@ function resizeParticleCanvas() {
     particleCanvas.height = rect.height;
 }
 
-window.addEventListener('resize', resizeParticleCanvas);
+window?.addEventListener('resize', resizeParticleCanvas);
 setTimeout(resizeParticleCanvas, 100);
 
 class Particle {
@@ -689,14 +689,14 @@ async function syncGameOverStats(finalScore, gameMaxStreak) {
 function initDragControls() {
     const dockSlots = document.querySelectorAll('.dock-slot');
     dockSlots.forEach(slot => {
-        slot.addEventListener('mousedown', handleDragStart);
-        slot.addEventListener('touchstart', handleDragStart, { passive: false });
+        slot?.addEventListener('mousedown', handleDragStart);
+        slot?.addEventListener('touchstart', handleDragStart, { passive: false });
     });
 
-    window.addEventListener('mousemove', handleDragMove);
-    window.addEventListener('touchmove', handleDragMove, { passive: false });
-    window.addEventListener('mouseup', handleDragEnd);
-    window.addEventListener('touchend', handleDragEnd);
+    window?.addEventListener('mousemove', handleDragMove);
+    window?.addEventListener('touchmove', handleDragMove, { passive: false });
+    window?.addEventListener('mouseup', handleDragEnd);
+    window?.addEventListener('touchend', handleDragEnd);
 }
 
 function handleDragStart(e) {
@@ -834,7 +834,7 @@ function resetGame() {
     content.classList.add('scale-90');
 }
 
-soundToggleBtn.addEventListener('click', () => {
+soundToggleBtn?.addEventListener('click', () => {
     soundEnabled = !soundEnabled;
     if (soundEnabled) {
         soundToggleBtn.classList.replace('bg-slate-700', 'bg-indigo-600');
@@ -845,8 +845,8 @@ soundToggleBtn.addEventListener('click', () => {
     }
 });
 
-restartBtn.addEventListener('click', resetGame);
-modalRestartBtn.addEventListener('click', resetGame);
+restartBtn?.addEventListener('click', resetGame);
+modalRestartBtn?.addEventListener('click', resetGame);
 
 let authToken = localStorage.getItem('blast_block_token') || null;
 let userProfile = JSON.parse(localStorage.getItem('blast_block_profile') || 'null');
@@ -1004,20 +1004,20 @@ function setAuthMode(signUp) {
     }
 }
 
-btnAccount.addEventListener('click', () => {
+btnAccount?.addEventListener('click', () => {
     authModal.classList.remove('hidden');
     updateUIState();
     authToken = localStorage.getItem('blast_block_token');
     if (authToken) fetchProfile();
 });
 
-authClose.addEventListener('click', () => authModal.classList.add('hidden'));
-authModal.addEventListener('click', e => { if (e.target === authModal) authModal.classList.add('hidden'); });
+authClose?.addEventListener('click', () => authModal.classList.add('hidden'));
+authModal?.addEventListener('click', e => { if (e.target === authModal) authModal.classList.add('hidden'); });
 
-tabLogin.addEventListener('click', () => setAuthMode(false));
-tabSignup.addEventListener('click', () => setAuthMode(true));
+tabLogin?.addEventListener('click', () => setAuthMode(false));
+tabSignup?.addEventListener('click', () => setAuthMode(true));
 
-authForm.addEventListener('submit', async (e) => {
+authForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     authMsg.textContent = 'Authenticating...';
     authMsg.className = 'text-xs text-center min-h-[1rem] text-cyan-300';
@@ -1052,7 +1052,7 @@ authForm.addEventListener('submit', async (e) => {
     }
 });
 
-profileEditForm.addEventListener('submit', async (e) => {
+profileEditForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     authMsg.textContent = 'Saving updates...';
     authMsg.className = 'text-xs text-center min-h-[1rem] text-cyan-300';
@@ -1066,7 +1066,7 @@ profileEditForm.addEventListener('submit', async (e) => {
     authMsg.className = 'text-xs text-center min-h-[1rem] text-green-400';
 });
 
-btnLogout.addEventListener('click', () => {
+btnLogout?.addEventListener('click', () => {
     localStorage.removeItem('blast_block_token');
     localStorage.removeItem('blast_block_profile');
     authToken = null;
