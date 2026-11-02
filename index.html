@@ -202,20 +202,17 @@
                 </div>
             </div>
 
-            <!-- Category Tabs: Themes vs Frames -->
             <div class="flex bg-slate-900/80 p-1 rounded-xl border border-white/10 shrink-0">
                 <button id="shop-tab-themes" class="flex-1 py-1.5 font-bold text-xs rounded-lg bg-emerald-500/30 text-emerald-300 transition">Themes</button>
                 <button id="shop-tab-frames" class="flex-1 py-1.5 font-bold text-xs text-slate-400 rounded-lg transition">Profile Frames</button>
             </div>
 
-            <!-- Sub-section Tabs: Store Catalog vs My Inventory -->
             <div class="flex bg-slate-900/50 p-1 rounded-xl border border-white/10 shrink-0 text-xs">
                 <button id="shop-subtab-store" class="flex-1 py-1 font-bold rounded-lg bg-cyan-500/30 text-cyan-300 transition">Store Catalog</button>
                 <button id="shop-subtab-inventory" class="flex-1 py-1 font-bold rounded-lg text-slate-400 transition">My Inventory</button>
             </div>
 
             <div id="shop-items-container" class="overflow-y-auto pr-1 flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 py-2">
-                <!-- Dynamic Shop Items Rendered Here -->
             </div>
         </div>
     </div>
@@ -325,7 +322,6 @@
 
         let SHOP_DATA = { themes: [], frames: [] };
 
-        // Fallback dictionary ensuring rotated-out items are never lost from inventory
         const SHOP_FALLBACKS = {
             themes: {
                 'default': { id: 'default', name: 'Deep Space', cost: 0, class: '' },
@@ -340,6 +336,28 @@
                 'frame-diamond': { id: 'frame-diamond', name: 'Diamond Glow', cost: 600, class: 'frame-diamond' }
             }
         };
+
+        async function authenticatedFetch(url, options = {}) {
+            const token = localStorage.getItem('blast_block_token');
+            const headers = options.headers || {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            options.headers = headers;
+        
+            const res = await fetch(url, options);
+            
+            if (res.status === 401) {
+                localStorage.removeItem('blast_block_token');
+                localStorage.removeItem('blast_block_profile');
+                localStorage.removeItem('block_blast_coins');
+                localStorage.removeItem('block_blast_highscore');
+                window.location.reload();
+                return null;
+            }
+        
+            return res;
+        }
 
         async function fetchShopCatalog() {
             try {
