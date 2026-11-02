@@ -176,13 +176,13 @@ const shopCoinsDisplay = document.getElementById('shop-coins-display');
 let activeShopTab = 'themes';
 let activeShopSubTab = 'store';
 
-btnToggleMenu.addEventListener('click', (e) => {
+btnToggleMenu?.addEventListener('click', (e) => {
     e.stopPropagation();
     topSlideMenu.classList.toggle('open');
     topSlideMenu.classList.toggle('closed');
 });
 
-window?.addEventListener('click', (e) => {
+window.addEventListener('click', (e) => {
     if (!topSlideMenu.contains(e.target) && !btnToggleMenu.contains(e.target)) {
         topSlideMenu.classList.add('closed');
         topSlideMenu.classList.remove('open');
