@@ -1,3 +1,4 @@
+// why are you here?
 async function authenticatedFetch(url, options = {}) {
     const token = localStorage.getItem('blast_block_token');
     const headers = options.headers || {};
