@@ -176,7 +176,7 @@ const shopCoinsDisplay = document.getElementById('shop-coins-display');
 let activeShopTab = 'themes';
 let activeShopSubTab = 'store';
 
-btnToggleMenu??.addEventListener('click', (e) => {
+btnToggleMenu?.addEventListener('click', (e) => {
     e.stopPropagation();
     topSlideMenu.classList.toggle('open');
     topSlideMenu.classList.toggle('closed');
