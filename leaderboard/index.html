@@ -119,6 +119,12 @@
             showLoading(true);
             try {
                 const res = await fetch('https://testing.blastblock.space/api/leaderboard');
+                
+                if (res.status === 401) {
+                    localStorage.removeItem('blast_block_token');
+                    localStorage.removeItem('blast_block_profile');
+                }
+
                 if (!res.ok) throw new Error('Failed to load leaderboard data');
                 const json = await res.json();
                 cachedLeaderboardData = json.data || json.leaderboard || [];
