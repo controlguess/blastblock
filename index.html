@@ -528,17 +528,22 @@
             renderShopItems();
         });
 
+        function formatItemName(name) {
+            if (!name) return '';
+            return name.replace(/\[(.*?)\]/g, '<span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 uppercase ml-1">$1</span>');
+        }
+
         function renderShopItems() {
             shopCoinsDisplay.textContent = coins.toLocaleString();
             shopItemsContainer.innerHTML = '';
-
+        
             const catalogItems = SHOP_DATA[activeShopTab] || [];
             const unlockedList = userProfile?.unlocked_items || ['default', 'frame-none'];
-
+        
             let itemsToRender = [];
-
+        
             if (activeShopSubTab === 'store') {
-                itemsToRender = catalogItems.filter(item => item.cost > 0 && !unlockedList.includes(item.id));
+                itemsToRender = catalogItems.filter(item => unlockedList.includes(item.id) || item.cost !== -5);
             } else {
                 const fallbackMap = SHOP_FALLBACKS[activeShopTab];
                 itemsToRender = unlockedList.map(id => {
@@ -547,7 +552,7 @@
                     return found;
                 }).filter(Boolean);
             }
-
+        
             if (itemsToRender.length === 0) {
                 shopItemsContainer.innerHTML = `
                     <div class="col-span-full py-12 flex flex-col items-center justify-center text-center text-slate-400 gap-2">
@@ -557,42 +562,51 @@
                 `;
                 return;
             }
-
+        
             itemsToRender.forEach(item => {
                 const isOwned = item.cost === 0 || unlockedList.includes(item.id);
+                const isOffsale = item.cost === -5;
                 const isEquipped = activeShopTab === 'themes' ? activeTheme === item.id : activeFrame === item.id;
-
+        
                 const card = document.createElement('div');
                 card.className = 'bg-slate-900/80 p-4 rounded-2xl border border-white/10 flex flex-col justify-between gap-3';
+                
+                let priceLabel = `${item.cost} Coins`;
+                if (isOwned) priceLabel = 'Owned';
+                if (isOffsale && !isOwned) priceLabel = '<span class="text-red-400 font-bold">OFFSALE</span>';
+        
                 card.innerHTML = `
                     <div class="flex flex-col gap-1">
-                        <span class="font-bold text-sm text-white">${item.name}</span>
-                        <span class="text-xs text-slate-400">${isOwned ? 'Owned' : `${item.cost} Coins`}</span>
+                        <span class="font-bold text-sm text-white flex items-center flex-wrap gap-1">${formatItemName(item.name)}</span>
+                        <span class="text-xs text-slate-400">${priceLabel}</span>
                     </div>
                     <button class="shop-item-btn w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
                         isEquipped 
                             ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default'
                             : isOwned 
                                 ? 'bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-300 border border-cyan-400/50'
-                                : coins >= item.cost 
-                                    ? 'bg-amber-500/30 hover:bg-amber-500/50 text-amber-300 border border-amber-400/50'
-                                    : 'bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed'
-                    }">
-                        ${isEquipped ? 'EQUIPPED' : isOwned ? 'EQUIP' : 'BUY'}
+                                : isOffsale
+                                    ? 'bg-slate-800/50 text-slate-500 border border-white/5 cursor-not-allowed opacity-50'
+                                    : coins >= item.cost 
+                                        ? 'bg-amber-500/30 hover:bg-amber-500/50 text-amber-300 border border-amber-400/50'
+                                        : 'bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed'
+                    }" ${isOffsale && !isOwned ? 'disabled' : ''}>
+                        ${isEquipped ? 'EQUIPPED' : isOwned ? 'EQUIP' : isOffsale ? 'OFFSALE' : 'BUY'}
                     </button>
                 `;
-
+        
                 const btn = card.querySelector('.shop-item-btn');
-                if (!isEquipped) {
+                if (!isEquipped && !(isOffsale && !isOwned)) {
                     btn.addEventListener('click', () => handleShopAction(item, isOwned));
                 }
-
+        
                 shopItemsContainer.appendChild(card);
             });
         }
 
         async function handleShopAction(item, isOwned) {
             if (!isOwned) {
+                if (item.cost === -5) return; 
                 if (coins < item.cost) return;
                 coins -= item.cost;
                 localStorage.setItem('block_blast_coins', coins.toString());
@@ -600,7 +614,7 @@
                 if (!unlocked.includes(item.id)) unlocked.push(item.id);
                 if (userProfile) userProfile.unlocked_items = unlocked;
             }
-
+        
             if (activeShopTab === 'themes') {
                 activeTheme = item.id;
                 localStorage.setItem('block_blast_theme', activeTheme);
@@ -610,10 +624,10 @@
                 localStorage.setItem('block_blast_frame', activeFrame);
                 applyFrame();
             }
-
+        
             updateScoreDisplays();
             renderShopItems();
-
+        
             await syncProfileData({
                 coins: coins,
                 active_theme: activeTheme,
