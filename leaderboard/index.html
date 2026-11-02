@@ -192,10 +192,10 @@
                     <div class="absolute -top-3.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border ${borderColor} flex items-center justify-center shadow-lg">
                         <i class="fa-solid ${crownIcons[rank]}"></i>
                     </div>
-                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden mt-3 mb-2 shrink-0 ${frameClass}">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden relative mt-3 mb-2 shrink-0 ${frameClass}" style="border-radius: 50%;">
                         ${player.avatar_url 
-                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover" alt="Avatar">`
-                            : `<i class="fa-solid fa-user text-lg sm:text-2xl text-slate-400"></i>`
+                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover rounded-full" alt="Avatar">`
+                            : `<div class="w-full h-full bg-slate-700 flex items-center justify-center rounded-full"><i class="fa-solid fa-user text-lg sm:text-2xl text-slate-400"></i></div>`
                         }
                     </div>
                     <h3 class="font-black text-xs sm:text-sm text-white truncate w-full">${player.username || 'Anonymous'}</h3>
@@ -223,10 +223,10 @@
             row.innerHTML = `
                 <div class="flex items-center gap-3 min-w-0">
                     <span class="w-7 text-center font-black text-xs sm:text-sm text-slate-400">#${rank}</span>
-                    <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 ${frameClass}">
+                    <div class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden relative shrink-0 ${frameClass}" style="border-radius: 50%;">
                         ${player.avatar_url 
-                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover" alt="Avatar">`
-                            : `<i class="fa-solid fa-user text-xs text-slate-400"></i>`
+                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover rounded-full" alt="Avatar">`
+                            : `<div class="w-full h-full bg-slate-700 flex items-center justify-center rounded-full"><i class="fa-solid fa-user text-xs text-slate-400"></i></div>`
                         }
                     </div>
                     <span class="font-bold text-xs sm:text-sm text-slate-200 truncate ${isCurrentUser ? 'text-cyan-300 font-black' : ''}">
