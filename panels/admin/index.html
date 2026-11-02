@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="bg-red-500/10 border border-red-500/30 text-red-400 p-2 rounded-lg text-sm font-bold">ADMIN</div>
+            <h1 class="font-bold text-lg tracking-tight">System Control Panel</h1>
+        </div>
+        <a href="/" class="text-xs text-slate-400 hover:text-white transition flex items-center gap-1.5 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+            <i class="fa-solid fa-arrow-left"></i> Exit to Site
+        </a>
+    </header>
+
+    <main class="flex-1 max-w-6xl w-full mx-auto p-6 flex flex-col gap-6">
+        <div id="unauthorized-banner" class="hidden bg-red-950/50 border border-red-800 p-4 rounded-xl text-red-200 text-sm">
+            Access denied. You do not possess administrator credentials.
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col gap-1">
+                <span class="text-xs text-slate-400 font-medium">System Status</span>
+                <span class="text-lg font-bold text-emerald-400 flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div> Operational</span>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col gap-1">
+                <span class="text-xs text-slate-400 font-medium">Database Connection</span>
+                <span class="text-lg font-bold text-slate-200">Supabase Connected</span>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col gap-1">
+                <span class="text-xs text-slate-400 font-medium">Auth Verification</span>
+                <span id="auth-status-label" class="text-lg font-bold text-amber-400">Verifying...</span>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <h2 class="font-semibold text-sm">User Directory & Permissions</h2>
+                <button onclick="loadUsers()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">Refresh List</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-950/50 text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                        <tr>
+                            <th class="px-6 py-3">User ID</th>
+                            <th class="px-6 py-3">Username</th>
+                            <th class="px-6 py-3">High Score</th>
+                            <th class="px-6 py-3">Coins</th>
+                            <th class="px-6 py-3">Admin Status</th>
+                            <th class="px-6 py-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body" class="divide-y divide-slate-800">
+                        <tr><td colspan="6" class="px-6 py-8 text-center text-slate-500">Loading user accounts...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function verifyAdmin() {
+            const token = localStorage.getItem('blast_block_token');
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const res = await fetch('https://testing.blastblock.space/api/admin?type=users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!res.ok) {
+                    document.getElementById('unauthorized-banner').classList.remove('hidden');
+                    document.getElementById('auth-status-label').textContent = 'Unauthorized';
+                    document.getElementById('auth-status-label').className = 'text-lg font-bold text-red-400';
+                    return;
+                }
+
+                const json = await res.json();
+                if (json.success) {
+                    document.getElementById('auth-status-label').textContent = 'Verified Admin';
+                    document.getElementById('auth-status-label').className = 'text-lg font-bold text-emerald-400';
+                    renderUsers(json.users);
+                }
+            } catch (err) {
+                document.getElementById('unauthorized-banner').classList.remove('hidden');
+            }
+        }
+
+        async function loadUsers() {
+            verifyAdmin();
+        }
+
+        function renderUsers(users) {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+
+            if (!users || users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-6 text-center text-slate-500">No users found.</td></tr>`;
+                return;
+            }
+
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/50 transition';
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-mono text-slate-500">${user.id.substring(0, 12)}...</td>
+                    <td class="px-6 py-4 font-medium text-slate-200">${user.username || 'Anonymous'}</td>
+                    <td class="px-6 py-4 text-amber-400 font-semibold">${(user.high_score || 0).toLocaleString()}</td>
+                    <td class="px-6 py-4 text-yellow-400 font-semibold">${(user.coins || 0).toLocaleString()}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${user.is_admin ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'}">
+                            ${user.is_admin ? 'ADMIN' : 'STANDARD'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="toggleAdmin('${user.id}', ${!user.is_admin})" class="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition font-medium">
+                            ${user.is_admin ? 'Revoke Admin' : 'Make Admin'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function toggleAdmin(targetUserId, makeAdmin) {
+            const token = localStorage.getItem('blast_block_token');
+            try {
+                const res = await fetch('https://testing.blastblock.space/api/admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        action: 'update_user_admin',
+                        targetUserId: targetUserId,
+                        isAdmin: makeAdmin
+                    })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    loadUsers();
+                } else {
+                    alert(json.error || 'Failed to update user role');
+                }
+            } catch (err) {
+                alert('Network connection error');
+            }
+        }
+
+        window.onload = verifyAdmin;
+    </script>
+</body>
+</html>
