@@ -10,6 +10,7 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://blastblock.space/files/frames.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -178,6 +179,7 @@
                 : (player.highest_streak || 0);
 
             const label = currentTab === 'high_score' ? 'PTS' : 'STREAK';
+            const frameClass = player.active_frame || 'frame-none';
 
             const crownIcons = {
                 1: 'fa-crown text-amber-400 text-2xl',
@@ -190,7 +192,7 @@
                     <div class="absolute -top-3.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border ${borderColor} flex items-center justify-center shadow-lg">
                         <i class="fa-solid ${crownIcons[rank]}"></i>
                     </div>
-                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-800 border-2 border-white/20 flex items-center justify-center overflow-hidden mt-3 mb-2 shrink-0">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden mt-3 mb-2 shrink-0 ${frameClass}">
                         ${player.avatar_url 
                             ? `<img src="${player.avatar_url}" class="w-full h-full object-cover" alt="Avatar">`
                             : `<i class="fa-solid fa-user text-lg sm:text-2xl text-slate-400"></i>`
@@ -216,11 +218,12 @@
                 : (player.highest_streak || 0);
 
             const unit = currentTab === 'high_score' ? 'pts' : 'x streak';
+            const frameClass = player.active_frame || 'frame-none';
 
             row.innerHTML = `
                 <div class="flex items-center gap-3 min-w-0">
                     <span class="w-7 text-center font-black text-xs sm:text-sm text-slate-400">#${rank}</span>
-                    <div class="w-8 h-8 rounded-full bg-slate-800 border border-white/15 flex items-center justify-center overflow-hidden shrink-0">
+                    <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 ${frameClass}">
                         ${player.avatar_url 
                             ? `<img src="${player.avatar_url}" class="w-full h-full object-cover" alt="Avatar">`
                             : `<i class="fa-solid fa-user text-xs text-slate-400"></i>`
@@ -257,14 +260,14 @@
 
         function generateDemoLeaderboard() {
             return [
-                { id: '1', username: 'BlockMaster', high_score: 42500, highest_streak: 18, avatar_url: '' },
-                { id: '2', username: 'PixelKnight', high_score: 38200, highest_streak: 14, avatar_url: '' },
-                { id: '3', username: 'BlastKing', high_score: 31900, highest_streak: 22, avatar_url: '' },
-                { id: '4', username: 'GridRunner', high_score: 27400, highest_streak: 11, avatar_url: '' },
-                { id: '5', username: 'CubeDestroyer', high_score: 24100, highest_streak: 9, avatar_url: '' },
-                { id: '6', username: 'ComboGod', high_score: 19800, highest_streak: 15, avatar_url: '' },
-                { id: '7', username: 'NeoMatrix', high_score: 16500, highest_streak: 8, avatar_url: '' },
-                { id: '8', username: 'ShadowBlock', high_score: 12400, highest_streak: 6, avatar_url: '' }
+                { id: '1', username: 'BlockMaster', high_score: 42500, highest_streak: 18, avatar_url: '', active_frame: 'frame-dev-rgb' },
+                { id: '2', username: 'PixelKnight', high_score: 38200, highest_streak: 14, avatar_url: '', active_frame: 'frame-gold' },
+                { id: '3', username: 'BlastKing', high_score: 31900, highest_streak: 22, avatar_url: '', active_frame: 'frame-matrix' },
+                { id: '4', username: 'GridRunner', high_score: 27400, highest_streak: 11, avatar_url: '', active_frame: 'frame-neon' },
+                { id: '5', username: 'CubeDestroyer', high_score: 24100, highest_streak: 9, avatar_url: '', active_frame: 'frame-solar' },
+                { id: '6', username: 'ComboGod', high_score: 19800, highest_streak: 15, avatar_url: '', active_frame: 'frame-void' },
+                { id: '7', username: 'NeoMatrix', high_score: 16500, highest_streak: 8, avatar_url: '', active_frame: 'frame-glitch' },
+                { id: '8', username: 'ShadowBlock', high_score: 12400, highest_streak: 6, avatar_url: '', active_frame: 'frame-diamond' }
             ];
         }
 
