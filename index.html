@@ -324,6 +324,9 @@
             return res;
         }
 
+        let previewTheme = null;
+        let previewFrame = null;
+
         const GRID_SIZE = 8;
         let score = 0;
         let highScore = parseInt(localStorage.getItem('block_blast_highscore') || '0', 10);
@@ -567,6 +570,7 @@
                 const isOwned = item.cost === 0 || unlockedList.includes(item.id);
                 const isOffsale = item.cost === -5;
                 const isEquipped = activeShopTab === 'themes' ? activeTheme === item.id : activeFrame === item.id;
+                const isPreviewing = activeShopTab === 'themes' ? previewTheme === item.id : previewFrame === item.id;
         
                 const card = document.createElement('div');
                 card.className = 'bg-slate-900/80 p-4 rounded-2xl border border-white/10 flex flex-col justify-between gap-3';
@@ -575,29 +579,62 @@
                 if (isOwned) priceLabel = 'Owned';
                 if (isOffsale && !isOwned) priceLabel = '<span class="text-red-400 font-bold">OFFSALE</span>';
         
+                let visualPreview = '';
+                if (activeShopTab === 'frames' && item.svg_icon) {
+                    visualPreview = `<div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden mx-auto my-1 ${item.css_class}">${item.svg_icon}</div>`;
+                }
+        
                 card.innerHTML = `
-                    <div class="flex flex-col gap-1">
-                        <span class="font-bold text-sm text-white flex items-center flex-wrap gap-1">${formatItemName(item.name)}</span>
+                    <div class="flex flex-col gap-1 items-center text-center">
+                        <span class="font-bold text-sm text-white flex items-center flex-wrap gap-1 justify-center">${formatItemName(item.name)}</span>
+                        ${visualPreview}
                         <span class="text-xs text-slate-400">${priceLabel}</span>
                     </div>
-                    <button class="shop-item-btn w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
-                        isEquipped 
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default'
-                            : isOwned 
-                                ? 'bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-300 border border-cyan-400/50'
-                                : isOffsale
-                                    ? 'bg-slate-800/50 text-slate-500 border border-white/5 cursor-not-allowed opacity-50'
-                                    : coins >= item.cost 
-                                        ? 'bg-amber-500/30 hover:bg-amber-500/50 text-amber-300 border border-amber-400/50'
-                                        : 'bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed'
-                    }" ${isOffsale && !isOwned ? 'disabled' : ''}>
-                        ${isEquipped ? 'EQUIPPED' : isOwned ? 'EQUIP' : isOffsale ? 'OFFSALE' : 'BUY'}
-                    </button>
+                    <div class="flex gap-2">
+                        ${!isOwned && !isOffsale ? `
+                            <button class="preview-item-btn flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
+                                isPreviewing ? 'bg-purple-500/40 text-purple-300 border border-purple-500/50' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/10'
+                            }">
+                                ${isPreviewing ? 'PREVIEWING' : 'PREVIEW'}
+                            </button>
+                        ` : ''}
+                        <button class="shop-item-btn flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
+                            isEquipped 
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default col-span-full'
+                                : isOwned 
+                                    ? 'bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-300 border border-cyan-400/50'
+                                    : isOffsale
+                                        ? 'bg-slate-800/50 text-slate-500 border border-white/5 cursor-not-allowed opacity-50'
+                                        : coins >= item.cost 
+                                            ? 'bg-amber-500/30 hover:bg-amber-500/50 text-amber-300 border border-amber-400/50'
+                                            : 'bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed'
+                        }" ${isOffsale && !isOwned ? 'disabled' : ''}>
+                            ${isEquipped ? 'EQUIPPED' : isOwned ? 'EQUIP' : isOffsale ? 'OFFSALE' : 'BUY'}
+                        </button>
+                    </div>
                 `;
         
                 const btn = card.querySelector('.shop-item-btn');
                 if (!isEquipped && !(isOffsale && !isOwned)) {
-                    btn.addEventListener('click', () => handleShopAction(item, isOwned));
+                    btn.addEventListener('click', () => {
+                        previewTheme = null;
+                        previewFrame = null;
+                        handleShopAction(item, isOwned);
+                    });
+                }
+        
+                const previewBtn = card.querySelector('.preview-item-btn');
+                if (previewBtn) {
+                    previewBtn.addEventListener('click', () => {
+                        if (activeShopTab === 'themes') {
+                            previewTheme = isPreviewing ? null : item.id;
+                            applyTheme();
+                        } else {
+                            previewFrame = isPreviewing ? null : item.id;
+                            applyFrame();
+                        }
+                        renderShopItems();
+                    });
                 }
         
                 shopItemsContainer.appendChild(card);
@@ -605,6 +642,9 @@
         }
 
         async function handleShopAction(item, isOwned) {
+            previewTheme = null;
+            previewFrame = null;
+            
             if (!isOwned) {
                 if (item.cost === -5) return; 
                 if (coins < item.cost) return;
@@ -637,20 +677,31 @@
         }
 
         function applyTheme() {
-            document.body.className = 'h-screen w-screen overflow-hidden text-white flex justify-center items-center ' + (activeTheme !== 'default' ? `theme-${activeTheme}` : '');
+            const themeToApply = previewTheme || activeTheme;
+            document.body.className = 'min-h-screen w-full overflow-y-auto text-white flex justify-center items-center py-4 lg:py-0 ' + (themeToApply !== 'default' ? `theme-${themeToApply}` : '');
         }
-
+        
         function applyFrame() {
+            const frameToApply = previewFrame || activeFrame;
             const avatarBoxMenu = document.getElementById('account-avatar-container');
             const avatarBoxDetail = document.getElementById('detail-avatar-container');
-
-            ['frame-none', 'frame-gold', 'frame-neon', 'frame-diamond'].forEach(f => {
+        
+            const allFrames = [
+                'frame-none', 'frame-gold', 'frame-neon', 'frame-diamond', 'frame-amethyst', 
+                'frame-cyberpunk', 'frame-dev-rgb', 'frame-event-tomorrow', 'frame-frost', 
+                'frame-glitch', 'frame-inferno', 'frame-matrix', 'frame-solar', 'frame-void', 
+                'frame-nebula', 'frame-hyperdrive', 'frame-overclock', 'frame-dragon', 
+                'frame-quantum', 'frame-eclipse', 'frame-supernova', 'frame-phantom', 
+                'frame-darkmatter', 'frame-synthwave', 'frame-omni-god'
+            ];
+        
+            allFrames.forEach(f => {
                 avatarBoxMenu.classList.remove(f);
                 if (avatarBoxDetail) avatarBoxDetail.classList.remove(f);
             });
-
-            avatarBoxMenu.classList.add(activeFrame);
-            if (avatarBoxDetail) avatarBoxDetail.classList.add(activeFrame);
+        
+            avatarBoxMenu.classList.add(frameToApply);
+            if (avatarBoxDetail) avatarBoxDetail.classList.add(frameToApply);
         }
 
         const particleCanvas = document.getElementById('particle-canvas');
@@ -691,6 +742,18 @@
                 ctx.restore();
             }
         }
+
+        function closeShop() {
+            shopModal.classList.add('hidden');
+            previewTheme = null;
+            previewFrame = null;
+            applyTheme();
+            applyFrame();
+            renderShopItems();
+        }
+        
+        shopClose.addEventListener('click', closeShop);
+        shopModal.addEventListener('click', e => { if (e.target === shopModal) closeShop(); });
 
         function createParticlesAtCell(r, c) {
             const slot = getSlotDOM(r, c);
