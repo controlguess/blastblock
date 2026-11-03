@@ -89,9 +89,9 @@
             <span class="hidden sm:inline">Leaderboard</span>
         </a>
         <button id="btn-account" title="Account" class="h-9 px-3 rounded-xl bg-white/10 hover:bg-white/20 flex items-center gap-2 text-cyan-300 transition text-xs font-bold">
-            <div id="account-avatar-container" class="w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center overflow-hidden frame-none">
-                <i id="account-icon-fallback" class="fa-solid fa-user text-[10px]"></i>
-                <img id="account-avatar-img" class="w-full h-full object-cover hidden" alt="Avatar">
+            <div id="account-avatar-container" class="relative w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center overflow-hidden frame-none">
+                <i id="account-icon-fallback" class="fa-solid fa-user text-[10px] relative z-10"></i>
+                <img id="account-avatar-img" class="absolute inset-0 w-full h-full object-cover z-0 hidden" alt="Avatar">
             </div>
             <span id="account-btn-label">Account</span>
         </button>
@@ -257,8 +257,8 @@
             <div id="auth-logged-in-view" class="flex flex-col gap-4 hidden">
                 <div class="flex items-center gap-4 bg-slate-900/80 p-4 rounded-2xl border border-white/10">
                     <div id="detail-avatar-container" class="relative w-16 h-16 rounded-full overflow-hidden bg-slate-800 frame-none shrink-0 flex items-center justify-center">
-                        <img id="detail-avatar-img" class="w-full h-full object-cover hidden" alt="Avatar">
-                        <i id="detail-avatar-fallback" class="fa-solid fa-user text-2xl text-slate-400"></i>
+                        <img id="detail-avatar-img" class="absolute inset-0 w-full h-full object-cover z-0 hidden" alt="Avatar">
+                        <i id="detail-avatar-fallback" class="fa-solid fa-user text-2xl text-slate-400 relative z-10"></i>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div id="detail-username-display" class="font-black text-lg text-cyan-300 truncate">User</div>
