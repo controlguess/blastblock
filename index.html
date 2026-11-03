@@ -686,22 +686,29 @@
             const avatarBoxMenu = document.getElementById('account-avatar-container');
             const avatarBoxDetail = document.getElementById('detail-avatar-container');
         
-            const allFrames = [
-                'frame-none', 'frame-gold', 'frame-neon', 'frame-diamond', 'frame-amethyst', 
-                'frame-cyberpunk', 'frame-dev-rgb', 'frame-event-tomorrow', 'frame-frost', 
-                'frame-glitch', 'frame-inferno', 'frame-matrix', 'frame-solar', 'frame-void', 
-                'frame-nebula', 'frame-hyperdrive', 'frame-overclock', 'frame-dragon', 
-                'frame-quantum', 'frame-eclipse', 'frame-supernova', 'frame-phantom', 
-                'frame-darkmatter', 'frame-synthwave', 'frame-omni-god'
-            ];
+            const catalogFrameIds = (SHOP_DATA.frames || []).map(f => f.id);
+            const fallbackFrameIds = Object.keys(SHOP_FALLBACKS.frames || {});
+            const allFrames = [...new Set([...catalogFrameIds, ...fallbackFrameIds])];
         
-            allFrames.forEach(f => {
-                avatarBoxMenu.classList.remove(f);
-                if (avatarBoxDetail) avatarBoxDetail.classList.remove(f);
+            const allCatalogFrames = [...(SHOP_DATA.frames || []), ...Object.values(SHOP_FALLBACKS.frames)];
+            const frameItem = allCatalogFrames.find(f => f.id === frameToApply);
+        
+            [avatarBoxMenu, avatarBoxDetail].forEach(box => {
+                if (!box) return;
+                
+                allFrames.forEach(f => box.classList.remove(f));
+                box.classList.add(frameToApply);
+        
+                const existingSvg = box.querySelector('.frame-svg-overlay');
+                if (existingSvg) existingSvg.remove();
+        
+                if (frameItem && frameItem.svg_icon && frameToApply !== 'frame-none') {
+                    const svgWrapper = document.createElement('div');
+                    svgWrapper.className = 'frame-svg-overlay absolute inset-0 pointer-events-none z-20 flex items-center justify-center p-0.5';
+                    svgWrapper.innerHTML = frameItem.svg_icon;
+                    box.appendChild(svgWrapper);
+                }
             });
-        
-            avatarBoxMenu.classList.add(frameToApply);
-            if (avatarBoxDetail) avatarBoxDetail.classList.add(frameToApply);
         }
 
         const particleCanvas = document.getElementById('particle-canvas');
