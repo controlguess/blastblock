@@ -2,261 +2,356 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Blast Block</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./files/frames.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: manipulation;
-            background: radial-gradient(circle at center, #1b2559 0%, #090d20 100%);
-            transition: background 0.5s ease;
+            touch-action: none;
+            background-color: #080c17;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 80% 80%, rgba(99, 102, 241, 0.14) 0%, transparent 45%);
+            transition: background-color 0.45s ease;
         }
 
-        body.theme-neon { background: radial-gradient(circle at center, #2d0036 0%, #050014 100%); }
-        body.theme-emerald { background: radial-gradient(circle at center, #064e3b 0%, #022c22 100%); }
-        body.theme-sunset { background: radial-gradient(circle at center, #7c2d12 0%, #450a0a 100%); }
+        body.theme-neon {
+            background-color: #0b0314;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(236, 72, 153, 0.18) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.18) 0%, transparent 50%);
+        }
+        body.theme-emerald {
+            background-color: #031510;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.18) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.14) 0%, transparent 50%);
+        }
+        body.theme-sunset {
+            background-color: #160705;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(249, 115, 22, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(239, 68, 68, 0.18) 0%, transparent 50%);
+        }
+
+        .font-mono-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .arcade-panel {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .board-well {
+            background: #0a0f1d;
+            border: 2px solid rgba(56, 189, 248, 0.28);
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.65),
+                inset 0 4px 14px rgba(0, 0, 0, 0.85),
+                0 0 28px rgba(14, 165, 233, 0.12);
+        }
+
+        .grid-slot {
+            background-color: rgba(17, 25, 46, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .grid-slot-highlight {
+            background-color: rgba(56, 189, 248, 0.28) !important;
+            border: 2px solid rgba(125, 211, 252, 0.9) !important;
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.55) !important;
+        }
 
         .block-cell {
-            border-radius: 2px;
-            box-shadow: inset 2px 2px 0px rgba(255, 255, 255, 0.45), inset -2px -2px 0px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0,0,0,0.3);
+            border-radius: 5px;
+            box-shadow:
+                inset 0 2px 1px rgba(255, 255, 255, 0.5),
+                inset 0 -3px 1px rgba(0, 0, 0, 0.35),
+                0 3px 6px rgba(0, 0, 0, 0.4);
             transition: transform 0.1s ease, opacity 0.15s ease;
         }
-        .color-cyan { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); }
-        .color-orange { background: linear-gradient(135deg, #ff930f 0%, #fff966 100%); }
-        .color-yellow { background: linear-gradient(135deg, #ffe000 0%, #799f0c 100%); }
-        .color-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-        .color-red { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); }
-        .color-purple { background: linear-gradient(135deg, #b224ef 0%, #7579ff 100%); }
-        .color-blue { background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); }
-        .grid-slot { background-color: rgba(14, 23, 47, 0.75); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 3px; }
-        .grid-slot-highlight { background-color: rgba(255, 255, 255, 0.35) !important; border: 2px solid rgba(255, 255, 255, 0.8) !important; box-shadow: 0 0 12px rgba(255, 255, 255, 0.5); }
-        #drag-ghost { position: fixed; pointer-events: none; z-index: 100; display: none; transform: translate(-50%, -50%) scale(1.05); filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.6)); }
-        .combo-glow { text-shadow: 0 0 20px rgba(0, 242, 254, 0.9), 0 0 40px rgba(178, 36, 239, 0.9), 0 0 60px rgba(255, 224, 0, 0.9); }
-        #particle-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 25; }
-        .glass-panel { background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
-        
+
+        .color-cyan { background: linear-gradient(145deg, #22d3ee 0%, #0284c7 100%); }
+        .color-orange { background: linear-gradient(145deg, #fb923c 0%, #ea580c 100%); }
+        .color-yellow { background: linear-gradient(145deg, #facc15 0%, #ca8a04 100%); }
+        .color-green { background: linear-gradient(145deg, #4ade80 0%, #16a34a 100%); }
+        .color-red { background: linear-gradient(145deg, #f87171 0%, #dc2626 100%); }
+        .color-purple { background: linear-gradient(145deg, #c084fc 0%, #7e22ce 100%); }
+        .color-blue { background: linear-gradient(145deg, #60a5fa 0%, #2563eb 100%); }
+
+        .dock-tray {
+            background: rgba(10, 15, 29, 0.92);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: inset 0 3px 10px rgba(0, 0, 0, 0.7), 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .dock-slot {
+            transition: transform 0.15s ease;
+        }
+        .dock-slot:hover {
+            transform: scale(1.06);
+        }
+
+        #drag-ghost {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+            transform: translate(-50%, -50%) scale(1.06);
+            filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.7));
+        }
+
+        .combo-glow {
+            text-shadow: 0 0 20px rgba(34, 211, 238, 0.9), 0 0 40px rgba(250, 204, 21, 0.9);
+        }
+
+        #particle-canvas {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 25;
+        }
+
         #top-slide-menu {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
         }
         #top-slide-menu.closed {
-            transform: translateY(-120%);
+            transform: translateY(-16px) scale(0.96);
             opacity: 0;
             pointer-events: none;
         }
         #top-slide-menu.open {
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
             opacity: 1;
             pointer-events: auto;
         }
-
-        .frame-none { border: 2px solid rgba(255, 255, 255, 0.2); }
-        .frame-gold { border: 3px solid #f59e0b !important; box-shadow: 0 0 10px rgba(245, 158, 11, 0.8); }
-        .frame-neon { border: 3px solid #ec4899 !important; box-shadow: 0 0 10px rgba(236, 72, 153, 0.8); }
-        .frame-diamond { border: 3px solid #06b6d4 !important; box-shadow: 0 0 12px rgba(6, 182, 212, 0.9); }
     </style>
 </head>
-<body class="min-h-screen w-full overflow-y-auto text-white flex justify-center items-center py-4 lg:py-0">
+<body class="h-[100dvh] w-screen overflow-hidden text-white flex flex-col justify-between lg:justify-center items-center p-2.5 sm:p-4 lg:p-6">
 
-    <div class="fixed top-2 right-4 z-[60]">
-        <button id="btn-toggle-menu" title="Toggle Menu" class="h-8 lg:h-11 px-3.5 rounded-xl glass-panel flex items-center gap-2 text-cyan-300 hover:text-white active:scale-95 transition text-xs lg:text-sm font-bold border border-white/15 shadow-lg">
-            <i class="fa-solid fa-bars"></i>
-            <span>Menu</span>
-        </button>
-    </div>
-
-    <div id="top-slide-menu" class="fixed top-14 right-4 z-[60] closed glass-panel p-3 rounded-2xl flex items-center gap-2 border border-white/20 shadow-2xl">
-        <button id="btn-shop" title="Shop" class="h-9 px-3 rounded-xl bg-white/10 hover:bg-white/20 flex items-center gap-2 text-emerald-300 transition text-xs font-bold">
+    <div id="top-slide-menu" class="fixed top-14 right-3 sm:right-5 z-[60] closed arcade-panel p-2 rounded-2xl flex items-center gap-1.5 border border-slate-700 shadow-2xl">
+        <button id="btn-shop" title="Shop" class="h-10 px-3.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 flex items-center gap-2 text-emerald-300 transition text-xs font-extrabold">
             <i class="fa-solid fa-store"></i>
-            <span class="hidden sm:inline">Shop</span>
+            <span>Shop</span>
         </button>
-        <button id="btn-mods" title="Mods (Disabled)" class="h-9 px-3 rounded-xl bg-white/5 opacity-25 cursor-not-allowed flex items-center gap-2 text-indigo-300 text-xs font-bold" disabled>
-            <i class="fa-solid fa-puzzle-piece"></i>
-            <span class="hidden sm:inline">Mods</span>
-        </button>
-        <a href="/leaderboard" title="Leaderboard" class="h-9 px-3 rounded-xl bg-white/10 hover:bg-white/20 flex items-center gap-2 text-amber-300 transition text-xs font-bold">
+        <a href="/leaderboard" title="Leaderboard" class="h-10 px-3.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 flex items-center gap-2 text-amber-300 transition text-xs font-extrabold">
             <i class="fa-solid fa-trophy"></i>
-            <span class="hidden sm:inline">Leaderboard</span>
+            <span>Ranks</span>
         </a>
-        <button id="btn-account" title="Account" class="h-9 px-3 rounded-xl bg-white/10 hover:bg-white/20 flex items-center gap-2 text-cyan-300 transition text-xs font-bold">
-            <div id="account-avatar-container" class="relative w-5 h-5 rounded-full bg-cyan-500/30 flex items-center justify-center overflow-hidden frame-none">
-                <i id="account-icon-fallback" class="fa-solid fa-user text-[10px] relative z-10"></i>
-                <img id="account-avatar-img" class="absolute inset-0 w-full h-full object-cover z-0 hidden" alt="Avatar">
+        <button id="btn-account" title="Account" class="h-10 px-3 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 flex items-center gap-2 text-cyan-300 transition text-xs font-extrabold">
+            <div class="avatar-frame-wrapper w-6 h-6 shrink-0">
+                <div class="avatar-frame-inner">
+                    <i id="account-icon-fallback" class="fa-solid fa-user text-[10px] text-slate-300"></i>
+                    <img id="account-avatar-img" class="hidden" alt="Avatar">
+                </div>
+                <div id="account-avatar-frame" class="avatar-frame-overlay frame-none"></div>
             </div>
-            <span id="account-btn-label">Account</span>
+            <span id="account-btn-label" class="max-w-[80px] truncate">Account</span>
         </button>
     </div>
 
-    <div class="w-full max-w-7xl flex flex-col lg:flex-row items-center justify-center lg:justify-between p-4 lg:p-8 gap-6 my-auto">
-        
-        <div class="flex flex-col w-full max-w-md lg:w-72 justify-between gap-4">
-            <div class="glass-panel p-5 lg:p-6 rounded-3xl flex flex-col items-center justify-center text-center">
-                <div class="flex items-center gap-3 mb-1">
-                    <div class="w-9 h-9 rounded-md color-cyan flex items-center justify-center shadow-lg border border-white/40"><i class="fa-solid fa-cubes text-lg text-white drop-shadow"></i></div>
-                    <h1 class="text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-yellow-300 to-pink-500">BLAST BLOCK</h1>
+    <div class="w-full max-w-6xl h-full lg:h-auto flex flex-col lg:flex-row items-center justify-between gap-2.5 lg:gap-8">
+
+        <div class="hidden lg:flex flex-col w-72 gap-4 shrink-0">
+            <div class="arcade-panel p-5 rounded-3xl flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-xl color-cyan flex items-center justify-center shadow-lg border border-white/30 shrink-0">
+                    <i class="fa-solid fa-cubes text-xl text-white drop-shadow"></i>
                 </div>
-                <p class="text-[10px] text-cyan-300/80 font-bold tracking-widest uppercase">Early Access</p>
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight text-white leading-none">BLAST BLOCK</h1>
+                    <span class="text-[11px] text-cyan-400 font-extrabold tracking-widest uppercase">Arcade Edition</span>
+                </div>
             </div>
 
-            <div class="glass-panel p-5 lg:p-6 rounded-3xl flex flex-col gap-3">
-                <div class="flex justify-between items-center border-b border-white/10 pb-2.5">
-                    <span class="text-slate-300 text-xs lg:text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-coins text-yellow-400"></i> Coins</span>
-                    <span id="stat-coins" class="text-xl lg:text-2xl font-black text-yellow-300">0</span>
+            <div class="arcade-panel p-5 rounded-3xl flex flex-col gap-3">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                    <span class="text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-coins text-yellow-400"></i> Coins</span>
+                    <span id="stat-coins" class="font-mono-num text-xl font-extrabold text-yellow-300">0</span>
                 </div>
-                <div class="flex justify-between items-center border-b border-white/10 pb-2.5">
-                    <span class="text-slate-300 text-xs lg:text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-fire text-amber-400"></i> Max Streak</span>
-                    <span id="stat-max-streak" class="text-xl lg:text-2xl font-black text-amber-300">0</span>
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                    <span class="text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-fire text-orange-400"></i> Max Streak</span>
+                    <span id="stat-max-streak" class="font-mono-num text-xl font-extrabold text-orange-300">0</span>
                 </div>
-                <div class="flex justify-between items-center border-b border-white/10 pb-2.5">
-                    <span class="text-slate-300 text-xs lg:text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-bolt text-cyan-400"></i> Lines Cleared</span>
-                    <span id="stat-lines-cleared" class="text-xl lg:text-2xl font-black text-cyan-300">0</span>
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                    <span class="text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-bolt text-cyan-400"></i> Lines</span>
+                    <span id="stat-lines-cleared" class="font-mono-num text-xl font-extrabold text-cyan-300">0</span>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-300 text-xs lg:text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-cubes-stacked text-purple-400"></i> Blocks Placed</span>
-                    <span id="stat-blocks-placed" class="text-xl lg:text-2xl font-black text-purple-300">0</span>
+                    <span class="text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-cubes-stacked text-purple-400"></i> Blocks</span>
+                    <span id="stat-blocks-placed" class="font-mono-num text-xl font-extrabold text-purple-300">0</span>
                 </div>
             </div>
 
-            <div class="glass-panel p-4 lg:p-5 rounded-3xl flex items-center justify-between">
-                <span class="text-xs lg:text-sm font-bold text-slate-200 flex items-center gap-2"><i class="fa-solid fa-volume-high text-indigo-400"></i> Sound FX</span>
-                <button id="btn-sound-toggle" class="w-12 h-6 bg-indigo-600 rounded-full p-1 flex items-center transition-colors">
+            <div class="arcade-panel p-4 rounded-2xl flex items-center justify-between">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-300 flex items-center gap-2"><i class="fa-solid fa-volume-high text-cyan-400"></i> Audio FX</span>
+                <button id="btn-sound-toggle" class="w-12 h-6 bg-cyan-600 rounded-full p-1 flex items-center transition-colors">
                     <div id="sound-toggle-dot" class="w-4 h-4 bg-white rounded-full translate-x-6 transition-transform shadow"></div>
                 </button>
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col items-center justify-center max-w-md lg:max-w-lg w-full gap-4">
-            <div class="w-full flex items-center justify-between px-5 py-3 glass-panel rounded-3xl border border-white/15">
-                <div class="flex flex-col items-start">
-                    <span class="text-[10px] lg:text-xs font-black text-amber-400/90 uppercase tracking-widest flex items-center gap-1"><i class="fa-solid fa-trophy text-amber-400 text-[10px]"></i> Best</span>
-                    <span id="high-score-display" class="text-xl lg:text-3xl font-black text-amber-300 tracking-wide">0</span>
-                </div>
-                <div class="flex flex-col items-center">
-                    <span class="text-[10px] lg:text-xs font-black text-slate-300 uppercase tracking-widest">Score</span>
-                    <span id="score-display" class="text-3xl lg:text-5xl font-black text-white tracking-wider drop-shadow-md">0</span>
-                </div>
-                <div class="flex flex-col items-end">
-                    <span class="text-[10px] lg:text-xs font-black text-orange-400/90 uppercase tracking-widest flex items-center gap-1">Streak <i class="fa-solid fa-bolt text-orange-400"></i></span>
-                    <div class="flex items-center gap-1">
-                        <span id="streak-display" class="text-xl lg:text-3xl font-black text-orange-400">0</span>
-                        <span class="text-xs text-orange-400 font-bold">x</span>
+        <div class="flex-1 w-full h-full lg:h-auto max-w-[440px] lg:max-w-[480px] flex flex-col items-center justify-between lg:justify-center gap-2.5 lg:gap-4">
+
+            <div class="w-full arcade-panel rounded-2xl px-3.5 py-2.5 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-extrabold text-amber-400 uppercase tracking-widest flex items-center gap-1"><i class="fa-solid fa-trophy text-[9px]"></i> Best</span>
+                        <span id="high-score-display" class="font-mono-num text-base sm:text-xl font-extrabold text-amber-300 leading-tight">0</span>
                     </div>
+                    <div class="h-7 w-[1px] bg-slate-800"></div>
+                    <div class="flex flex-col">
+                        <span class="text-[9px] font-extrabold text-orange-400 uppercase tracking-widest flex items-center gap-1">Streak <i class="fa-solid fa-bolt text-[9px]"></i></span>
+                        <span class="font-mono-num text-base sm:text-xl font-extrabold text-orange-400 leading-tight"><span id="streak-display">0</span>x</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Score</span>
+                    <span id="score-display" class="font-mono-num text-2xl sm:text-4xl font-extrabold text-white leading-none">0</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <div class="hidden sm:flex lg:hidden items-center gap-1 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800">
+                        <i class="fa-solid fa-coins text-yellow-400 text-xs"></i>
+                        <span id="mobile-coins-display" class="font-mono-num text-xs font-extrabold text-yellow-300">0</span>
+                    </div>
+                    <button id="btn-toggle-menu" title="Menu" class="h-9 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center gap-1.5 text-cyan-300 active:scale-95 transition text-xs font-extrabold">
+                        <i class="fa-solid fa-bars"></i>
+                        <span class="hidden sm:inline">Menu</span>
+                    </button>
                 </div>
             </div>
 
-            <div class="relative w-full aspect-square p-2.5 glass-panel rounded-3xl shadow-2xl border-2 border-cyan-500/30 flex items-center justify-center overflow-hidden">
+            <div class="relative w-full aspect-square max-h-[54dvh] sm:max-h-[58dvh] lg:max-h-none p-2.5 board-well rounded-3xl flex items-center justify-center overflow-hidden shrink">
                 <canvas id="particle-canvas"></canvas>
-                <div id="grid-container" class="grid grid-cols-8 grid-rows-8 gap-1 w-full h-full relative z-10"></div>
+                <div id="grid-container" class="grid grid-cols-8 grid-rows-8 gap-1 sm:gap-1.5 w-full h-full relative z-10"></div>
                 <div id="combo-floating-container" class="absolute inset-0 pointer-events-none flex items-center justify-center z-30"></div>
             </div>
 
-            <div class="w-full glass-panel rounded-3xl p-3 flex items-center justify-around h-28 lg:h-36 relative border border-white/15">
-                <div class="dock-slot w-20 lg:w-28 h-20 lg:h-28 flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="0"></div>
-                <div class="dock-slot w-20 lg:w-28 h-20 lg:h-28 flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="1"></div>
-                <div class="dock-slot w-20 lg:w-28 h-20 lg:h-28 flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="2"></div>
+            <div class="w-full dock-tray rounded-3xl px-2 py-2.5 flex items-center justify-around h-24 sm:h-28 lg:h-32 shrink-0">
+                <div class="dock-slot w-24 sm:w-28 h-full flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="0"></div>
+                <div class="dock-slot w-24 sm:w-28 h-full flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="1"></div>
+                <div class="dock-slot w-24 sm:w-28 h-full flex items-center justify-center relative cursor-grab active:cursor-grabbing" data-slot-index="2"></div>
             </div>
         </div>
 
-        <div class="flex flex-col w-full max-w-md lg:w-72 justify-between gap-4">
-            <div class="glass-panel p-5 lg:p-6 rounded-3xl flex flex-col gap-3">
-                <h3 class="text-sm font-black text-slate-100 border-b border-white/10 pb-2 flex items-center gap-2"><i class="fa-solid fa-gamepad text-cyan-400"></i> Controls & Rules</h3>
-                <ul class="text-xs text-slate-300 space-y-2 lg:space-y-3 leading-relaxed">
-                    <li class="flex items-start gap-2"><span class="bg-cyan-500/30 text-cyan-300 rounded px-1.5 py-0.5 font-bold">1</span><span>Drag shapes onto the grid to form full lines.</span></li>
-                    <li class="flex items-start gap-2"><span class="bg-cyan-500/30 text-cyan-300 rounded px-1.5 py-0.5 font-bold">2</span><span>Clear rows or columns to make room and score points.</span></li>
-                    <li class="flex items-start gap-2"><span class="bg-amber-500/30 text-amber-300 rounded px-1.5 py-0.5 font-bold">3</span><span>Clear back-to-back lines for <strong class="text-amber-300">Mega Combos</strong>!</span></li>
+        <div class="hidden lg:flex flex-col w-72 gap-4 shrink-0">
+            <div class="arcade-panel p-5 rounded-3xl flex flex-col gap-3">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-200 border-b border-slate-800 pb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-cyan-400"></i> How To Play
+                </h3>
+                <ul class="text-xs text-slate-300 space-y-2.5 leading-relaxed">
+                    <li class="flex items-start gap-2.5"><span class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-md px-1.5 py-0.5 font-mono-num font-bold">1</span><span>Place pieces onto the 8x8 board to complete rows or columns.</span></li>
+                    <li class="flex items-start gap-2.5"><span class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-md px-1.5 py-0.5 font-mono-num font-bold">2</span><span>Clear multiple lines simultaneously for bonus score multipliers.</span></li>
+                    <li class="flex items-start gap-2.5"><span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-md px-1.5 py-0.5 font-mono-num font-bold">3</span><span>Chain clears back-to-back to build your <strong class="text-amber-300">Streak</strong>.</span></li>
                 </ul>
             </div>
-            <div class="glass-panel p-5 lg:p-6 rounded-3xl flex flex-col items-center justify-center gap-4">
-                <button id="btn-restart-game" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 active:scale-95 transition font-black rounded-2xl shadow-xl flex items-center justify-center gap-2 text-xs lg:text-sm tracking-wider uppercase">
-                    <i class="fa-solid fa-rotate-right"></i> Restart Game
-                </button>
-            </div>
+
+            <button id="btn-restart-game" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 active:scale-95 transition font-black text-slate-950 rounded-2xl shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 text-xs tracking-wider uppercase">
+                <i class="fa-solid fa-rotate-right"></i> New Game
+            </button>
         </div>
+
     </div>
 
     <div id="drag-ghost"></div>
 
-    <div id="shop-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[70] flex items-center justify-center p-4 hidden">
-        <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 flex flex-col gap-4 border border-white/20 max-h-[90vh] overflow-hidden">
-            <div class="flex items-center justify-between border-b border-white/10 pb-3">
-                <h2 class="text-xl font-black tracking-wider flex items-center gap-2 text-emerald-400">
+    <div id="shop-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[70] flex items-center justify-center p-3 sm:p-4 hidden">
+        <div class="arcade-panel w-full max-w-2xl rounded-3xl p-5 sm:p-6 flex flex-col gap-4 border border-slate-700 max-h-[88dvh] overflow-hidden">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-lg sm:text-xl font-black tracking-wide flex items-center gap-2 text-emerald-400">
                     <i class="fa-solid fa-store"></i> BLAST SHOP
                 </h2>
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-1.5 bg-slate-900/80 px-3 py-1 rounded-full border border-yellow-500/30">
-                        <i class="fa-solid fa-coins text-yellow-400 text-sm"></i>
-                        <span id="shop-coins-display" class="font-black text-yellow-300 text-sm">0</span>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-yellow-500/30">
+                        <i class="fa-solid fa-coins text-yellow-400 text-xs"></i>
+                        <span id="shop-coins-display" class="font-mono-num font-extrabold text-yellow-300 text-xs sm:text-sm">0</span>
                     </div>
-                    <button id="shop-close" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                    <button id="shop-close" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
 
-            <div class="flex bg-slate-900/80 p-1 rounded-xl border border-white/10 shrink-0">
-                <button id="shop-tab-themes" class="flex-1 py-1.5 font-bold text-xs rounded-lg bg-emerald-500/30 text-emerald-300 transition">Themes</button>
-                <button id="shop-tab-frames" class="flex-1 py-1.5 font-bold text-xs text-slate-400 rounded-lg transition">Profile Frames</button>
+            <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+                <button id="shop-tab-themes" class="flex-1 py-2 font-extrabold text-xs rounded-lg bg-emerald-500 text-slate-950 transition">Themes</button>
+                <button id="shop-tab-frames" class="flex-1 py-2 font-extrabold text-xs text-slate-400 rounded-lg transition">Profile Frames</button>
             </div>
 
-            <div class="flex bg-slate-900/50 p-1 rounded-xl border border-white/10 shrink-0 text-xs">
-                <button id="shop-subtab-store" class="flex-1 py-1 font-bold rounded-lg bg-cyan-500/30 text-cyan-300 transition">Store Catalog</button>
-                <button id="shop-subtab-inventory" class="flex-1 py-1 font-bold rounded-lg text-slate-400 transition">My Inventory</button>
+            <div class="flex bg-slate-950/60 p-1 rounded-xl border border-slate-800 shrink-0 text-xs">
+                <button id="shop-subtab-store" class="flex-1 py-1.5 font-bold rounded-lg bg-cyan-500/20 text-cyan-300 transition">Store Catalog</button>
+                <button id="shop-subtab-inventory" class="flex-1 py-1.5 font-bold rounded-lg text-slate-400 transition">My Inventory</button>
             </div>
 
-            <div id="shop-items-container" class="overflow-y-auto pr-1 flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 py-2"></div>
+            <div id="shop-items-container" class="overflow-y-auto pr-1 flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 py-1"></div>
         </div>
     </div>
 
     <div id="game-over-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="glass-panel max-w-md w-full p-8 rounded-3xl flex flex-col items-center text-center shadow-2xl border border-white/20 scale-90 transition-transform duration-300" id="game-over-content">
-            <div class="w-20 h-20 rounded-2xl bg-red-500/20 border-2 border-red-500/50 flex items-center justify-center mb-4 text-red-400 text-4xl shadow-lg"><i class="fa-solid fa-ban"></i></div>
-            <h2 class="text-3xl font-black text-white tracking-wider mb-1">NO MORE MOVES!</h2>
-            <p class="text-sm text-slate-300 mb-6">There is no remaining space on the grid for your shapes.</p>
-            <div class="w-full bg-slate-900/80 rounded-2xl p-4 mb-6 flex flex-col gap-3 border border-white/10">
-                <div class="flex justify-between items-center border-b border-white/10 pb-2"><span class="text-slate-400 text-sm font-bold">Final Score</span><span id="go-final-score" class="text-3xl font-black text-white">0</span></div>
-                <div class="flex justify-between items-center"><span class="text-slate-400 text-sm font-bold">High Score</span><span id="go-high-score" class="text-2xl font-black text-amber-400">0</span></div>
+        <div class="arcade-panel max-w-sm w-full p-7 rounded-3xl flex flex-col items-center text-center shadow-2xl border border-slate-700 scale-90 transition-transform duration-300" id="game-over-content">
+            <div class="w-16 h-16 rounded-2xl bg-red-500/15 border border-red-500/40 flex items-center justify-center mb-4 text-red-400 text-3xl">
+                <i class="fa-solid fa-ban"></i>
             </div>
-            <div id="new-highscore-badge" class="hidden mb-6 py-2 px-5 bg-amber-500/20 border border-amber-400/50 rounded-full text-amber-300 text-xs font-black tracking-widest uppercase flex items-center gap-2">
-                <i class="fa-solid fa-crown"></i> New Personal Best!
+            <h2 class="text-2xl font-black text-white tracking-wide mb-1">NO MORE MOVES</h2>
+            <p class="text-xs text-slate-400 mb-5">No remaining space on the board for your shapes.</p>
+            <div class="w-full bg-slate-950 rounded-2xl p-4 mb-5 flex flex-col gap-3 border border-slate-800">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <span class="text-slate-400 text-xs font-bold uppercase">Final Score</span>
+                    <span id="go-final-score" class="font-mono-num text-2xl font-extrabold text-white">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400 text-xs font-bold uppercase">High Score</span>
+                    <span id="go-high-score" class="font-mono-num text-xl font-extrabold text-amber-400">0</span>
+                </div>
             </div>
-            <button id="btn-modal-restart" class="w-full py-4 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 hover:opacity-95 active:scale-95 text-white font-black text-base tracking-widest rounded-2xl shadow-xl transition uppercase">PLAY AGAIN</button>
+            <div id="new-highscore-badge" class="hidden mb-5 py-1.5 px-4 bg-amber-500/15 border border-amber-400/40 rounded-full text-amber-300 text-xs font-extrabold tracking-wider uppercase flex items-center gap-2">
+                <i class="fa-solid fa-crown"></i> New Personal Best
+            </div>
+            <button id="btn-modal-restart" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 active:scale-95 text-slate-950 font-black text-sm tracking-wider rounded-2xl shadow-lg transition uppercase">PLAY AGAIN</button>
         </div>
     </div>
 
     <div id="auth-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[70] flex items-center justify-center p-4 hidden">
-        <div class="glass-panel w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 border border-white/20">
+        <div class="arcade-panel w-full max-w-md rounded-3xl p-6 flex flex-col gap-4 border border-slate-700 max-h-[90dvh] overflow-y-auto">
             <div class="flex items-center justify-between">
-                <h2 class="text-xl font-black tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-id-card text-cyan-400"></i> ACCOUNT DETAILS
+                <h2 class="text-lg font-black tracking-wide flex items-center gap-2">
+                    <i class="fa-solid fa-id-card text-cyan-400"></i> ACCOUNT
                 </h2>
-                <button id="auth-close" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <button id="auth-close" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <div id="auth-logged-out-view" class="flex flex-col gap-3">
-                <div class="flex bg-slate-900/80 p-1 rounded-xl border border-white/10">
-                    <button id="tab-login" class="flex-1 py-1.5 font-bold text-xs rounded-lg bg-cyan-500/30 text-cyan-300 transition">Log In</button>
-                    <button id="tab-signup" class="flex-1 py-1.5 font-bold text-xs text-slate-400 rounded-lg transition">Sign Up</button>
+                <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button id="tab-login" class="flex-1 py-1.5 font-extrabold text-xs rounded-lg bg-cyan-500 text-slate-950 transition">Log In</button>
+                    <button id="tab-signup" class="flex-1 py-1.5 font-extrabold text-xs text-slate-400 rounded-lg transition">Sign Up</button>
                 </div>
                 <form id="auth-form" class="flex flex-col gap-3">
-                    <input id="auth-username" type="text" placeholder="Username" class="w-full px-3 py-2.5 rounded-xl bg-slate-900/80 border border-white/15 text-sm text-white outline-none focus:border-cyan-400 hidden">
-                    <input id="auth-email" type="email" placeholder="Email address" class="w-full px-3 py-2.5 rounded-xl bg-slate-900/80 border border-white/15 text-sm text-white outline-none focus:border-cyan-400" required>
-                    <input id="auth-password" type="password" placeholder="Password" class="w-full px-3 py-2.5 rounded-xl bg-slate-900/80 border border-white/15 text-sm text-white outline-none focus:border-cyan-400" required>
-                    <button type="submit" id="auth-submit-btn" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 font-black text-sm uppercase tracking-wider active:scale-95 transition">LOG IN</button>
+                    <input id="auth-username" type="text" placeholder="Username" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white outline-none focus:border-cyan-400 hidden">
+                    <input id="auth-email" type="email" placeholder="Email address" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white outline-none focus:border-cyan-400" required>
+                    <input id="auth-password" type="password" placeholder="Password" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white outline-none focus:border-cyan-400" required>
+                    <button type="submit" id="auth-submit-btn" class="w-full py-3 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs uppercase tracking-wider active:scale-95 transition">LOG IN</button>
                 </form>
             </div>
 
             <div id="auth-logged-in-view" class="flex flex-col gap-4 hidden">
-                <div class="flex items-center gap-4 bg-slate-900/80 p-4 rounded-2xl border border-white/10">
-                    <div id="detail-avatar-container" class="relative w-16 h-16 rounded-full overflow-hidden bg-slate-800 frame-none shrink-0 flex items-center justify-center">
-                        <img id="detail-avatar-img" class="absolute inset-0 w-full h-full object-cover z-0 hidden" alt="Avatar">
-                        <i id="detail-avatar-fallback" class="fa-solid fa-user text-2xl text-slate-400 relative z-10"></i>
+                <div class="flex items-center gap-4 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                    <div class="avatar-frame-wrapper w-16 h-16 shrink-0">
+                        <div class="avatar-frame-inner">
+                            <img id="detail-avatar-img" class="hidden" alt="Avatar">
+                            <i id="detail-avatar-fallback" class="fa-solid fa-user text-2xl text-slate-400"></i>
+                        </div>
+                        <div id="detail-avatar-frame" class="avatar-frame-overlay frame-none"></div>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div id="detail-username-display" class="font-black text-lg text-cyan-300 truncate">User</div>
@@ -265,32 +360,40 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 bg-slate-900/80 p-3 rounded-2xl border border-white/10 text-center">
+                <div class="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-2xl border border-slate-800 text-center">
                     <div>
                         <div class="text-[10px] text-slate-400 uppercase font-bold">Record High Score</div>
-                        <div id="display-recorded-highscore" class="text-lg font-black text-amber-300">0</div>
+                        <div id="display-recorded-highscore" class="font-mono-num text-lg font-extrabold text-amber-300">0</div>
                     </div>
                     <div>
                         <div class="text-[10px] text-slate-400 uppercase font-bold">Record Max Streak</div>
-                        <div id="display-recorded-maxstreak" class="text-lg font-black text-orange-400">0</div>
+                        <div id="display-recorded-maxstreak" class="font-mono-num text-lg font-extrabold text-orange-400">0</div>
                     </div>
                 </div>
 
-                <form id="profile-edit-form" class="flex flex-col gap-3 bg-slate-900/50 p-4 rounded-2xl border border-white/10">
-                    <span class="text-xs font-bold text-slate-300 uppercase tracking-wider border-b border-white/10 pb-1">Edit Account Profile</span>
+                <form id="profile-edit-form" class="flex flex-col gap-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+                    <span class="text-xs font-extrabold text-slate-300 uppercase tracking-wider border-b border-slate-800 pb-1.5">Edit Profile</span>
                     <div>
                         <label class="text-[11px] text-slate-400 font-semibold">Avatar Image URL</label>
-                        <input id="edit-avatar-url" type="url" placeholder="https://example.com/avatar.png" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-white/15 text-xs text-white outline-none focus:border-cyan-400 mt-1">
+                        <input id="edit-avatar-url" type="url" placeholder="https://example.com/avatar.png" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white outline-none focus:border-cyan-400 mt-1">
                     </div>
                     <div>
                         <label class="text-[11px] text-slate-400 font-semibold">Username</label>
-                        <input id="edit-username" type="text" placeholder="Username" class="w-full px-3 py-2 rounded-xl bg-slate-900/90 border border-white/15 text-xs text-white outline-none focus:border-cyan-400 mt-1">
+                        <input id="edit-username" type="text" placeholder="Username" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white outline-none focus:border-cyan-400 mt-1">
                     </div>
-                    <button type="submit" class="w-full py-2.5 rounded-xl bg-cyan-500/30 hover:bg-cyan-500/50 border border-cyan-400/50 font-black text-xs uppercase tracking-wider text-cyan-300 transition mt-1">SAVE CHANGES</button>
+                    <button type="submit" class="w-full py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 font-black text-xs uppercase tracking-wider text-cyan-300 transition mt-1">SAVE CHANGES</button>
                 </form>
 
-                <button id="btn-logout" class="w-full py-3 rounded-xl bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30 font-black text-xs uppercase tracking-wider active:scale-95 transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-right-from-bracket"></i> LOG OUT
+                <div class="flex gap-2 lg:hidden">
+                    <button id="btn-mobile-restart" class="flex-1 py-3 rounded-xl bg-slate-800 text-slate-200 font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Restart
+                    </button>
+                    <button id="btn-logout" class="flex-1 py-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 hover:bg-red-500/25 font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                    </button>
+                </div>
+                <button id="btn-logout-desktop" class="hidden lg:flex w-full py-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 hover:bg-red-500/25 font-extrabold text-xs uppercase tracking-wider items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-from-bracket"></i> Log Out
                 </button>
             </div>
 
@@ -349,6 +452,13 @@
                 'frame-neon': { id: 'frame-neon', name: 'Pink Neon Ring', cost: 350, class: 'frame-neon' },
                 'frame-diamond': { id: 'frame-diamond', name: 'Diamond Glow', cost: 600, class: 'frame-diamond' }
             }
+        };
+
+        const THEME_PREVIEW_STYLES = {
+            'default': 'background: radial-gradient(circle, #1e293b 0%, #080c17 100%);',
+            'neon': 'background: radial-gradient(circle, #4a044e 0%, #0b0314 100%);',
+            'emerald': 'background: radial-gradient(circle, #065f46 0%, #031510 100%);',
+            'sunset': 'background: radial-gradient(circle, #9a3412 0%, #160705 100%);'
         };
 
         async function fetchShopCatalog() {
@@ -447,6 +557,7 @@
         const highScoreDisplay = document.getElementById('high-score-display');
         const streakDisplay = document.getElementById('streak-display');
         const statCoins = document.getElementById('stat-coins');
+        const mobileCoinsDisplay = document.getElementById('mobile-coins-display');
         const statMaxStreak = document.getElementById('stat-max-streak');
         const statLinesCleared = document.getElementById('stat-lines-cleared');
         const statBlocksPlaced = document.getElementById('stat-blocks-placed');
@@ -454,6 +565,7 @@
         const soundToggleBtn = document.getElementById('btn-sound-toggle');
         const soundToggleDot = document.getElementById('sound-toggle-dot');
         const restartBtn = document.getElementById('btn-restart-game');
+        const mobileRestartBtn = document.getElementById('btn-mobile-restart');
         const modalRestartBtn = document.getElementById('btn-modal-restart');
         const gameOverModal = document.getElementById('game-over-modal');
 
@@ -486,6 +598,8 @@
         });
 
         btnShop.addEventListener('click', () => {
+            topSlideMenu.classList.add('closed');
+            topSlideMenu.classList.remove('open');
             shopModal.classList.remove('hidden');
             renderShopItems();
         });
@@ -494,29 +608,29 @@
 
         shopTabThemes.addEventListener('click', () => {
             activeShopTab = 'themes';
-            shopTabThemes.className = 'flex-1 py-1.5 font-bold text-xs rounded-lg bg-emerald-500/30 text-emerald-300 transition';
-            shopTabFrames.className = 'flex-1 py-1.5 font-bold text-xs text-slate-400 rounded-lg transition';
+            shopTabThemes.className = 'flex-1 py-2 font-extrabold text-xs rounded-lg bg-emerald-500 text-slate-950 transition';
+            shopTabFrames.className = 'flex-1 py-2 font-extrabold text-xs text-slate-400 rounded-lg transition';
             renderShopItems();
         });
 
         shopTabFrames.addEventListener('click', () => {
             activeShopTab = 'frames';
-            shopTabFrames.className = 'flex-1 py-1.5 font-bold text-xs rounded-lg bg-emerald-500/30 text-emerald-300 transition';
-            shopTabThemes.className = 'flex-1 py-1.5 font-bold text-xs text-slate-400 rounded-lg transition';
+            shopTabFrames.className = 'flex-1 py-2 font-extrabold text-xs rounded-lg bg-emerald-500 text-slate-950 transition';
+            shopTabThemes.className = 'flex-1 py-2 font-extrabold text-xs text-slate-400 rounded-lg transition';
             renderShopItems();
         });
 
         shopSubtabStore.addEventListener('click', () => {
             activeShopSubTab = 'store';
-            shopSubtabStore.className = 'flex-1 py-1 font-bold rounded-lg bg-cyan-500/30 text-cyan-300 transition';
-            shopSubtabInventory.className = 'flex-1 py-1 font-bold rounded-lg text-slate-400 transition';
+            shopSubtabStore.className = 'flex-1 py-1.5 font-bold rounded-lg bg-cyan-500/20 text-cyan-300 transition';
+            shopSubtabInventory.className = 'flex-1 py-1.5 font-bold rounded-lg text-slate-400 transition';
             renderShopItems();
         });
 
         shopSubtabInventory.addEventListener('click', () => {
             activeShopSubTab = 'inventory';
-            shopSubtabInventory.className = 'flex-1 py-1 font-bold rounded-lg bg-cyan-500/30 text-cyan-300 transition';
-            shopSubtabStore.className = 'flex-1 py-1 font-bold rounded-lg text-slate-400 transition';
+            shopSubtabInventory.className = 'flex-1 py-1.5 font-bold rounded-lg bg-cyan-500/20 text-cyan-300 transition';
+            shopSubtabStore.className = 'flex-1 py-1.5 font-bold rounded-lg text-slate-400 transition';
             renderShopItems();
         });
 
@@ -530,7 +644,7 @@
             let itemsToRender = [];
 
             if (activeShopSubTab === 'store') {
-                itemsToRender = catalogItems.filter(item => item.cost > 0 && !unlockedList.includes(item.id));
+                itemsToRender = catalogItems.filter(item => item.cost > 0 && !unlockedList.includes(item.id) && !item.off_sale);
             } else {
                 const fallbackMap = SHOP_FALLBACKS[activeShopTab];
                 itemsToRender = unlockedList.map(id => {
@@ -543,32 +657,69 @@
             if (itemsToRender.length === 0) {
                 shopItemsContainer.innerHTML = `
                     <div class="col-span-full py-12 flex flex-col items-center justify-center text-center text-slate-400 gap-2">
-                        <i class="fa-solid fa-box-open text-3xl text-slate-500"></i>
-                        <p class="text-xs font-semibold">${activeShopSubTab === 'store' ? 'No new items available in store right now.' : 'You have not unlocked any items in this category yet.'}</p>
+                        <i class="fa-solid fa-box-open text-3xl text-slate-600"></i>
+                        <p class="text-xs font-semibold">${activeShopSubTab === 'store' ? 'No new items available in the store right now.' : 'You have not unlocked any items in this category yet.'}</p>
                     </div>
                 `;
                 return;
             }
 
+            const currentAvatarUrl = userProfile?.avatar_url || '';
+
             itemsToRender.forEach(item => {
                 const isOwned = item.cost === 0 || unlockedList.includes(item.id);
                 const isEquipped = activeShopTab === 'themes' ? activeTheme === item.id : activeFrame === item.id;
 
+                let previewHTML = '';
+                if (activeShopTab === 'frames') {
+                    const frameClass = item.class || item.id;
+                    previewHTML = `
+                        <div class="w-16 h-16 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center shrink-0">
+                            <div class="avatar-frame-wrapper w-11 h-11">
+                                <div class="avatar-frame-inner">
+                                    ${currentAvatarUrl
+                                        ? `<img src="${currentAvatarUrl}" alt="Preview">`
+                                        : `<i class="fa-solid fa-user text-sm text-slate-400"></i>`
+                                    }
+                                </div>
+                                <div class="avatar-frame-overlay ${frameClass}"></div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const bgStyle = THEME_PREVIEW_STYLES[item.id] || THEME_PREVIEW_STYLES['default'];
+                    previewHTML = `
+                        <div class="w-16 h-16 rounded-2xl border border-slate-700 flex items-center justify-center shrink-0 p-2" style="${bgStyle}">
+                            <div class="grid grid-cols-2 gap-1 w-8 h-8">
+                                <div class="block-cell color-cyan"></div>
+                                <div class="block-cell color-yellow"></div>
+                                <div class="block-cell color-purple"></div>
+                                <div class="block-cell color-green"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 const card = document.createElement('div');
-                card.className = 'bg-slate-900/80 p-4 rounded-2xl border border-white/10 flex flex-col justify-between gap-3';
+                card.className = 'bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 flex flex-col justify-between gap-3';
                 card.innerHTML = `
-                    <div class="flex flex-col gap-1">
-                        <span class="font-bold text-sm text-white">${item.name}</span>
-                        <span class="text-xs text-slate-400">${isOwned ? 'Owned' : `${item.cost} Coins`}</span>
+                    <div class="flex items-center gap-3.5">
+                        ${previewHTML}
+                        <div class="flex flex-col min-w-0">
+                            <span class="font-extrabold text-sm text-white truncate">${item.name}</span>
+                            <span class="font-mono-num text-xs font-bold ${isOwned ? 'text-emerald-400' : 'text-amber-300'} mt-0.5">
+                                ${isOwned ? 'Owned' : `${item.cost.toLocaleString()} Coins`}
+                            </span>
+                        </div>
                     </div>
                     <button class="shop-item-btn w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
-                        isEquipped 
+                        isEquipped
                             ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default'
-                            : isOwned 
-                                ? 'bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-300 border border-cyan-400/50'
-                                : coins >= item.cost 
-                                    ? 'bg-amber-500/30 hover:bg-amber-500/50 text-amber-300 border border-amber-400/50'
-                                    : 'bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed'
+                            : isOwned
+                                ? 'bg-cyan-500/20 hover:bg-cyan-500/35 text-cyan-300 border border-cyan-500/40'
+                                : coins >= item.cost
+                                    ? 'bg-amber-500 hover:bg-amber-400 text-slate-950'
+                                    : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
                     }">
                         ${isEquipped ? 'EQUIPPED' : isOwned ? 'EQUIP' : 'BUY'}
                     </button>
@@ -584,15 +735,14 @@
         }
 
         async function handleShopAction(item, isOwned) {
-            previewTheme = null;
-            previewFrame = null;
-        
             const token = localStorage.getItem('blast_block_token');
             if (!token) {
                 alert('Log in to buy or equip shop items.');
                 return;
             }
-        
+
+            if (!isOwned && (item.cost < 0 || coins < item.cost)) return;
+
             if (activeShopTab === 'themes') {
                 activeTheme = item.id;
                 localStorage.setItem('block_blast_theme', activeTheme);
@@ -604,17 +754,15 @@
                 if (userProfile) userProfile.active_frame = activeFrame;
                 applyFrame();
             }
-        
+
             if (userProfile) {
                 localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
             }
-        
+
             updateUIState();
             renderShopItems();
-        
+
             if (!isOwned) {
-                if (item.cost < 0 || coins < item.cost) return;
-        
                 try {
                     const res = await fetch('https://testing.blastblock.space/api/user', {
                         method: 'POST',
@@ -628,7 +776,7 @@
                             itemType: activeShopTab
                         })
                     });
-        
+
                     const json = await res.json();
                     if (!res.ok || !json.success) {
                         alert(json.error || 'Purchase failed');
@@ -636,7 +784,7 @@
                         renderShopItems();
                         return;
                     }
-        
+
                     userProfile = { ...userProfile, ...json.profile };
                     localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
                     coins = json.profile.coins;
@@ -659,27 +807,25 @@
                             active_frame: activeFrame
                         })
                     });
-                } catch (err) {
-                    console.error('Background sync failed, but local state is preserved:', err);
-                }
+                } catch (err) {}
             }
         }
 
         function applyTheme() {
-            document.body.className = 'min-h-screen w-full overflow-y-auto text-white flex justify-center items-center py-4 lg:py-0 ' + (activeTheme !== 'default' ? `theme-${activeTheme}` : '');
+            document.body.classList.remove('theme-neon', 'theme-emerald', 'theme-sunset');
+            if (activeTheme !== 'default') {
+                document.body.classList.add(`theme-${activeTheme}`);
+            }
         }
 
         function applyFrame() {
-            const avatarBoxMenu = document.getElementById('account-avatar-container');
-            const avatarBoxDetail = document.getElementById('detail-avatar-container');
+            const avatarFrameMenu = document.getElementById('account-avatar-frame');
+            const avatarFrameDetail = document.getElementById('detail-avatar-frame');
 
-            ['frame-none', 'frame-gold', 'frame-neon', 'frame-diamond'].forEach(f => {
-                avatarBoxMenu.classList.remove(f);
-                if (avatarBoxDetail) avatarBoxDetail.classList.remove(f);
+            [avatarFrameMenu, avatarFrameDetail].forEach(el => {
+                if (!el) return;
+                el.className = `avatar-frame-overlay ${activeFrame || 'frame-none'}`;
             });
-
-            avatarBoxMenu.classList.add(activeFrame);
-            if (avatarBoxDetail) avatarBoxDetail.classList.add(activeFrame);
         }
 
         const particleCanvas = document.getElementById('particle-canvas');
@@ -730,8 +876,8 @@
             const y = slotRect.top - gridRect.top + slotRect.height / 2;
 
             for (let i = 0; i < 8; i++) {
-                particles.push(new Particle(x, y, '#00f2fe'));
-                particles.push(new Particle(x, y, '#fff966'));
+                particles.push(new Particle(x, y, '#22d3ee'));
+                particles.push(new Particle(x, y, '#facc15'));
             }
         }
 
@@ -771,99 +917,201 @@
 
                     if (colorClass) {
                         const block = document.createElement('div');
-                        block.className = `block-cell ${colorClass} w-full h-full`;
+                        block.className = `block-cell w-full h-full ${colorClass}`;
                         slot.appendChild(block);
                     }
                 }
             }
         }
 
-        function getRandomShape() {
-            const index = Math.floor(Math.random() * SHAPES_CONFIG.length);
-            return JSON.parse(JSON.stringify(SHAPES_CONFIG[index]));
-        }
-
-        function fillDockSlots() {
-            const dockSlots = document.querySelectorAll('.dock-slot');
-            dockSlots.forEach((slot, index) => {
-                if (!dockShapes[index]) dockShapes[index] = getRandomShape();
-                renderDockSlot(slot, dockShapes[index]);
-            });
-            checkGameOverCondition();
-        }
-
-        function renderDockSlot(container, shape) {
-            container.innerHTML = '';
-            if (!shape) return;
-
-            const matrix = shape.matrix;
-            const rows = matrix.length;
-            const cols = matrix[0].length;
-
-            const wrapper = document.createElement('div');
-            wrapper.className = `grid gap-1 pointer-events-none transition-transform duration-200`;
-            wrapper.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
-
-            const cellSize = Math.min(24, 95 / Math.max(rows, cols));
+        function createShapeDOM(shape, cellSizePx) {
+            const rows = shape.matrix.length;
+            const cols = shape.matrix[0].length;
+            const container = document.createElement('div');
+            container.style.display = 'grid';
+            container.style.gridTemplateColumns = `repeat(${cols}, ${cellSizePx}px)`;
+            container.style.gridTemplateRows = `repeat(${rows}, ${cellSizePx}px)`;
+            container.style.gap = '3px';
 
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
                     const cell = document.createElement('div');
-                    cell.style.width = `${cellSize}px`;
-                    cell.style.height = `${cellSize}px`;
-                    if (matrix[r][c] === 1) cell.className = `block-cell ${shape.color}`;
-                    wrapper.appendChild(cell);
+                    if (shape.matrix[r][c] === 1) {
+                        cell.className = `block-cell w-full h-full ${shape.color}`;
+                    }
+                    container.appendChild(cell);
                 }
             }
-            container.appendChild(wrapper);
-            gsap.fromTo(wrapper, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'back.out(1.7)' });
+            return container;
+        }
+
+        function generateNewDockShapes() {
+            for (let i = 0; i < 3; i++) {
+                const rand = SHAPES_CONFIG[Math.floor(Math.random() * SHAPES_CONFIG.length)];
+                dockShapes[i] = { matrix: rand.matrix, color: rand.color };
+            }
+            renderDock();
+        }
+
+        function renderDock() {
+            const slots = document.querySelectorAll('.dock-slot');
+            slots.forEach((slotEl, index) => {
+                slotEl.innerHTML = '';
+                const shape = dockShapes[index];
+                if (shape) {
+                    const cellSize = window.innerWidth < 640 ? 15 : 18;
+                    const shapeDOM = createShapeDOM(shape, cellSize);
+                    shapeDOM.dataset.slotIndex = index;
+                    slotEl.appendChild(shapeDOM);
+                    gsap.fromTo(shapeDOM, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.25, ease: 'back.out(1.7)' });
+                }
+            });
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.grid-slot-highlight').forEach(el => el.classList.remove('grid-slot-highlight'));
+        }
+
+        function getTargetGridCell(clientX, clientY, shape) {
+            const gridRect = gridContainer.getBoundingClientRect();
+            const cellSize = gridRect.width / GRID_SIZE;
+            const rows = shape.matrix.length;
+            const cols = shape.matrix[0].length;
+
+            const shapeWidth = cols * cellSize;
+            const shapeHeight = rows * cellSize;
+
+            const isTouch = window.matchMedia('(pointer: coarse)').matches;
+            const offsetY = isTouch ? 65 : 0;
+
+            const topLeftX = clientX - shapeWidth / 2;
+            const topLeftY = (clientY - offsetY) - shapeHeight / 2;
+
+            const col = Math.round((topLeftX - gridRect.left) / cellSize);
+            const row = Math.round((topLeftY - gridRect.top) / cellSize);
+
+            return { row, col };
         }
 
         function canPlaceShape(shape, startRow, startCol) {
-            const matrix = shape.matrix;
-            for (let r = 0; r < matrix.length; r++) {
-                for (let c = 0; c < matrix[0].length; c++) {
-                    if (matrix[r][c] === 1) {
-                        const targetR = startRow + r;
-                        const targetC = startCol + c;
-                        if (targetR < 0 || targetR >= GRID_SIZE || targetC < 0 || targetC >= GRID_SIZE) return false;
-                        if (grid[targetR][targetC] !== null) return false;
+            const rows = shape.matrix.length;
+            const cols = shape.matrix[0].length;
+
+            if (startRow < 0 || startCol < 0 || startRow + rows > GRID_SIZE || startCol + cols > GRID_SIZE) {
+                return false;
+            }
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (shape.matrix[r][c] === 1 && grid[startRow + r][startCol + c] !== null) {
+                        return false;
                     }
                 }
             }
             return true;
         }
 
-        function placeShape(shape, startRow, startCol) {
-            const matrix = shape.matrix;
-            let blockCount = 0;
+        function highlightPlacement(shape, startRow, startCol) {
+            clearHighlights();
+            if (!canPlaceShape(shape, startRow, startCol)) return;
 
-            for (let r = 0; r < matrix.length; r++) {
-                for (let c = 0; c < matrix[0].length; c++) {
-                    if (matrix[r][c] === 1) {
+            for (let r = 0; r < shape.matrix.length; r++) {
+                for (let c = 0; c < shape.matrix[0].length; c++) {
+                    if (shape.matrix[r][c] === 1) {
+                        const slot = getSlotDOM(startRow + r, startCol + c);
+                        if (slot) slot.classList.add('grid-slot-highlight');
+                    }
+                }
+            }
+        }
+
+        function onPointerDown(e) {
+            const slotEl = e.target.closest('.dock-slot');
+            if (!slotEl) return;
+
+            const index = parseInt(slotEl.dataset.slotIndex, 10);
+            const shape = dockShapes[index];
+            if (!shape) return;
+
+            draggingSlotIndex = index;
+            activeDragShape = shape;
+
+            const gridRect = gridContainer.getBoundingClientRect();
+            const cellSize = (gridRect.width / GRID_SIZE) * 0.92;
+
+            dragGhost.innerHTML = '';
+            dragGhost.appendChild(createShapeDOM(shape, cellSize));
+            dragGhost.style.display = 'block';
+
+            slotEl.style.opacity = '0.25';
+            updateDragPosition(e.clientX, e.clientY, e.pointerType === 'touch');
+        }
+
+        function updateDragPosition(clientX, clientY, isTouch = false) {
+            if (!activeDragShape) return;
+            const offsetY = isTouch ? 65 : 0;
+            dragGhost.style.left = `${clientX}px`;
+            dragGhost.style.top = `${clientY - offsetY}px`;
+
+            const { row, col } = getTargetGridCell(clientX, clientY, activeDragShape);
+            highlightPlacement(activeDragShape, row, col);
+        }
+
+        function onPointerMove(e) {
+            if (!activeDragShape) return;
+            updateDragPosition(e.clientX, e.clientY, e.pointerType === 'touch');
+        }
+
+        function onPointerUp(e) {
+            if (!activeDragShape) return;
+
+            const slotEl = document.querySelector(`.dock-slot[data-slot-index="${draggingSlotIndex}"]`);
+            if (slotEl) slotEl.style.opacity = '1';
+
+            dragGhost.style.display = 'none';
+            clearHighlights();
+
+            const { row, col } = getTargetGridCell(e.clientX, e.clientY, activeDragShape);
+
+            if (canPlaceShape(activeDragShape, row, col)) {
+                placeShape(activeDragShape, row, col, draggingSlotIndex);
+            }
+
+            draggingSlotIndex = null;
+            activeDragShape = null;
+        }
+
+        document.addEventListener('pointerdown', onPointerDown);
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
+
+        function placeShape(shape, startRow, startCol, slotIndex) {
+            let blocksCount = 0;
+            for (let r = 0; r < shape.matrix.length; r++) {
+                for (let c = 0; c < shape.matrix[0].length; c++) {
+                    if (shape.matrix[r][c] === 1) {
                         grid[startRow + r][startCol + c] = shape.color;
-                        blockCount++;
+                        blocksCount++;
                     }
                 }
             }
 
-            score += blockCount * 10;
-            totalBlocksPlaced += blockCount;
+            totalBlocksPlaced += blocksCount;
+            score += blocksCount * 10;
+            dockShapes[slotIndex] = null;
+
             sfx.playPlace();
             renderGrid();
-
-            for (let r = 0; r < matrix.length; r++) {
-                for (let c = 0; c < matrix[0].length; c++) {
-                    if (matrix[r][c] === 1) {
-                        const slot = getSlotDOM(startRow + r, startCol + c);
-                        const block = slot.querySelector('.block-cell');
-                        if (block) gsap.fromTo(block, { scale: 0.7 }, { scale: 1, duration: 0.15, ease: 'back.out(2)' });
-                    }
-                }
-            }
+            renderDock();
 
             checkAndClearLines();
-            updateScoreDisplays();
+
+            if (dockShapes.every(s => s === null)) {
+                generateNewDockShapes();
+            }
+
+            updateUIState();
+            checkGameOver();
         }
 
         function checkAndClearLines() {
@@ -873,343 +1121,184 @@
             for (let r = 0; r < GRID_SIZE; r++) {
                 if (grid[r].every(cell => cell !== null)) fullRows.push(r);
             }
+
             for (let c = 0; c < GRID_SIZE; c++) {
-                let isFull = true;
+                let full = true;
                 for (let r = 0; r < GRID_SIZE; r++) {
-                    if (grid[r][c] === null) { isFull = false; break; }
+                    if (grid[r][c] === null) { full = false; break; }
                 }
-                if (isFull) fullCols.push(c);
+                if (full) fullCols.push(c);
             }
 
-            const linesCleared = fullRows.length + fullCols.length;
-
-            if (linesCleared > 0) {
-                streak++;
-                if (streak > maxStreak) maxStreak = streak;
-                totalLinesCleared += linesCleared;
-
-                coins += linesCleared * 10 + (streak > 1 ? streak * 5 : 0);
-                localStorage.setItem('block_blast_coins', coins.toString());
-
-                fullRows.forEach(r => { for (let c = 0; c < GRID_SIZE; c++) createParticlesAtCell(r, c); });
-                fullCols.forEach(c => { for (let r = 0; r < GRID_SIZE; r++) createParticlesAtCell(r, c); });
-
-                const baseLineScore = linesCleared * 100;
-                const comboBonus = linesCleared > 1 ? linesCleared * 150 : 0;
-                const streakBonus = streak > 1 ? streak * 50 : 0;
-                score += (baseLineScore + comboBonus + streakBonus);
-
-                sfx.playClear(streak);
-
-                const slotsToClear = new Set();
-                fullRows.forEach(r => { for (let c = 0; c < GRID_SIZE; c++) slotsToClear.add(`${r},${c}`); });
-                fullCols.forEach(c => { for (let r = 0; r < GRID_SIZE; r++) slotsToClear.add(`${r},${c}`); });
-
-                slotsToClear.forEach(coord => {
-                    const [r, c] = coord.split(',').map(Number);
-                    const slot = getSlotDOM(r, c);
-                    const block = slot.querySelector('.block-cell');
-                    if (block) {
-                        gsap.to(block, {
-                            scale: 1.3, opacity: 0, duration: 0.2, ease: 'power2.out',
-                            onComplete: () => { grid[r][c] = null; renderGrid(); }
-                        });
-                    } else {
-                        grid[r][c] = null;
-                    }
-                });
-
-                if (linesCleared >= 2 || streak >= 3) {
-                    confetti({ particleCount: 60 * linesCleared, spread: 70, origin: { y: 0.6 } });
-                    showComboEffect(linesCleared, streak);
-                }
-            } else {
+            const totalCleared = fullRows.length + fullCols.length;
+            if (totalCleared === 0) {
                 streak = 0;
+                return;
             }
 
-            updateScoreDisplays();
+            streak++;
+            if (streak > maxStreak) maxStreak = streak;
+            totalLinesCleared += totalCleared;
+
+            const cellsToClear = new Set();
+            fullRows.forEach(r => { for (let c = 0; c < GRID_SIZE; c++) cellsToClear.add(`${r},${c}`); });
+            fullCols.forEach(c => { for (let r = 0; r < GRID_SIZE; r++) cellsToClear.add(`${r},${c}`); });
+
+            cellsToClear.forEach(coord => {
+                const [r, c] = coord.split(',').map(Number);
+                createParticlesAtCell(r, c);
+                grid[r][c] = null;
+            });
+
+            const lineBonus = totalCleared * 100 * totalCleared;
+            const streakBonus = streak > 1 ? streak * 50 : 0;
+            const earnedPoints = lineBonus + streakBonus;
+            score += earnedPoints;
+
+            const earnedCoins = totalCleared * 2 + (streak > 1 ? streak : 0);
+            coins += earnedCoins;
+            localStorage.setItem('block_blast_coins', coins.toString());
+
+            sfx.playClear(streak);
+            showComboBanner(totalCleared, streak, earnedPoints);
+
+            setTimeout(() => {
+                renderGrid();
+                updateUIState();
+            }, 90);
         }
 
-        function showComboEffect(lines, comboStreak) {
+        function showComboBanner(lines, currentStreak, pts) {
             const container = document.getElementById('combo-floating-container');
-            const comboEl = document.createElement('div');
-            comboEl.className = 'absolute font-black italic tracking-widest pointer-events-none z-40 flex flex-col items-center justify-center';
-
-            let comboTitle = `COMBO ${comboStreak}!`;
-            if (lines >= 3) comboTitle = `SUPER BLAST!`;
-            if (comboStreak >= 4) comboTitle = `EXCELLENT!!`;
-
-            comboEl.innerHTML = `<span class="text-4xl lg:text-6xl text-white combo-glow font-black drop-shadow-2xl uppercase">${comboTitle}</span>`;
-            container.appendChild(comboEl);
-
-            gsap.fromTo(comboEl, 
-                { scale: 0.2, y: 30, opacity: 0 }, 
-                { scale: 1.25, y: -20, opacity: 1, duration: 0.35, ease: 'back.out(2.2)', onComplete: () => {
-                    gsap.to(comboEl, { scale: 1, y: -60, opacity: 0, duration: 0.45, delay: 0.35, ease: 'power2.in', onComplete: () => {
-                        if (comboEl.parentNode) comboEl.parentNode.removeChild(comboEl);
-                    }});
+            const banner = document.createElement('div');
+            banner.className = 'flex flex-col items-center text-center combo-glow';
+            banner.innerHTML = `
+                <span class="text-2xl sm:text-3xl font-black text-white tracking-wider">
+                    ${lines > 1 ? `${lines}x MULTI CLEAR!` : 'LINE CLEAR!'}
+                </span>
+                <span class="font-mono-num text-sm sm:text-base font-extrabold text-amber-300">+${pts} PTS ${currentStreak > 1 ? `(${currentStreak}x STREAK)` : ''}</span>
+            `;
+            container.appendChild(banner);
+            gsap.fromTo(banner,
+                { scale: 0.4, opacity: 0, y: 20 },
+                { scale: 1.1, opacity: 1, y: -20, duration: 0.35, ease: 'back.out(1.7)', onComplete: () => {
+                    gsap.to(banner, { opacity: 0, y: -50, duration: 0.4, delay: 0.35, onComplete: () => banner.remove() });
                 }}
             );
         }
 
-        function updateScoreDisplays() {
-            scoreDisplay.textContent = score.toLocaleString();
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('block_blast_highscore', highScore.toString());
-            }
-
-            highScoreDisplay.textContent = highScore.toLocaleString();
-            streakDisplay.textContent = streak;
-            statCoins.textContent = coins.toLocaleString();
-            statMaxStreak.textContent = maxStreak;
-            statLinesCleared.textContent = totalLinesCleared;
-            statBlocksPlaced.textContent = totalBlocksPlaced;
-        }
-
-        function checkGameOverCondition() {
-            let canMoveAny = false;
-            for (let i = 0; i < dockShapes.length; i++) {
-                const shape = dockShapes[i];
+        function hasAnyValidMove() {
+            for (const shape of dockShapes) {
                 if (!shape) continue;
-
                 for (let r = 0; r < GRID_SIZE; r++) {
                     for (let c = 0; c < GRID_SIZE; c++) {
-                        if (canPlaceShape(shape, r, c)) { canMoveAny = true; break; }
+                        if (canPlaceShape(shape, r, c)) return true;
                     }
-                    if (canMoveAny) break;
                 }
-                if (canMoveAny) break;
             }
-
-            if (dockShapes.every(s => s === null)) canMoveAny = true;
-            if (!canMoveAny) setTimeout(triggerGameOver, 400);
+            return false;
         }
 
-        function triggerGameOver() {
+        async function checkGameOver() {
+            if (hasAnyValidMove()) return;
+
             sfx.playGameOver();
+            const isNewBest = score > highScore;
+            if (isNewBest) {
+                highScore = score;
+                localStorage.setItem('block_blast_highscore', highScore.toString());
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+                }
+            }
+
             document.getElementById('go-final-score').textContent = score.toLocaleString();
             document.getElementById('go-high-score').textContent = highScore.toLocaleString();
-            
-            const badge = document.getElementById('new-highscore-badge');
-            if (score >= highScore && score > 0) {
-                badge.classList.remove('hidden');
-                confetti({ particleCount: 120, spread: 100, origin: { y: 0.5 } });
-            } else {
-                badge.classList.add('hidden');
-            }
-
-            syncGameOverStats(score, maxStreak);
+            document.getElementById('new-highscore-badge').classList.toggle('hidden', !isNewBest);
 
             gameOverModal.classList.remove('opacity-0', 'pointer-events-none');
-            const content = document.getElementById('game-over-content');
-            content.classList.remove('scale-90');
-            content.classList.add('scale-100');
+            document.getElementById('game-over-content').classList.remove('scale-90');
+            document.getElementById('game-over-content').classList.add('scale-100');
+
+            await submitGameScore();
         }
 
-        async function syncGameOverStats(finalScore, gameMaxStreak) {
+        async function submitGameScore() {
             const token = localStorage.getItem('blast_block_token');
-            if (!token || !currentGameSessionId) return;
+            if (!token) return;
             try {
-                const res = await fetch('https://testing.blastblock.space/api/user', {
+                const res = await fetch('https://testing.blastblock.space/api/game/submit', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        action: 'submit_game',
                         sessionId: currentGameSessionId,
-                        game_score: finalScore,
-                        game_streak: gameMaxStreak,
-                        coins: coins
+                        score,
+                        maxStreak,
+                        coinsEarned: coins
                     })
                 });
                 const json = await res.json();
-                if (json.success) {
+                if (res.ok && json.profile) {
                     userProfile = { ...userProfile, ...json.profile };
                     localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
                     updateUIState();
-                } else {
-                    alert('Score submission issue: ' + json.error);
                 }
             } catch (err) {}
-            currentGameSessionId = null;
         }
 
-        function initDragControls() {
-            const dockSlots = document.querySelectorAll('.dock-slot');
-            dockSlots.forEach(slot => {
-                slot.addEventListener('mousedown', handleDragStart);
-                slot.addEventListener('touchstart', handleDragStart, { passive: false });
-            });
-
-            window.addEventListener('mousemove', handleDragMove);
-            window.addEventListener('touchmove', handleDragMove, { passive: false });
-            window.addEventListener('mouseup', handleDragEnd);
-            window.addEventListener('touchend', handleDragEnd);
-        }
-
-        function handleDragStart(e) {
-            const slotIndex = parseInt(this.dataset.slotIndex, 10);
-            const shape = dockShapes[slotIndex];
-            if (!shape) return;
-
-            if (e.type === 'touchstart') e.preventDefault();
-
-            draggingSlotIndex = slotIndex;
-            activeDragShape = shape;
-
-            renderDragGhost(shape);
-            updateGhostPosition(e);
-            dragGhost.style.display = 'block';
-            this.style.opacity = '0.3';
-        }
-
-        function renderDragGhost(shape) {
-            dragGhost.innerHTML = '';
-            const matrix = shape.matrix;
-            const gridEl = document.createElement('div');
-            gridEl.className = 'grid gap-1';
-            gridEl.style.gridTemplateColumns = `repeat(${matrix[0].length}, minmax(0, 1fr))`;
-
-            const firstSlot = gridContainer.children[0];
-            const slotWidth = firstSlot ? firstSlot.getBoundingClientRect().width : 40;
-
-            for (let r = 0; r < matrix.length; r++) {
-                for (let c = 0; c < matrix[0].length; c++) {
-                    const cell = document.createElement('div');
-                    cell.style.width = `${slotWidth}px`;
-                    cell.style.height = `${slotWidth}px`;
-                    if (matrix[r][c] === 1) cell.className = `block-cell ${shape.color}`;
-                    gridEl.appendChild(cell);
-                }
-            }
-            dragGhost.appendChild(gridEl);
-        }
-
-        function updateGhostPosition(e) {
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            const offsetY = e.touches ? -60 : 0;
-
-            dragGhost.style.left = `${clientX}px`;
-            dragGhost.style.top = `${clientY + offsetY}px`;
-            updateBoardHighlights(clientX, clientY + offsetY);
-        }
-
-        function handleDragMove(e) {
-            if (draggingSlotIndex === null) return;
-            if (e.type === 'touchmove') e.preventDefault();
-            updateGhostPosition(e);
-        }
-
-        function updateBoardHighlights(pointerX, pointerY) {
-            clearBoardHighlights();
-            if (!activeDragShape) return;
-
-            const gridRect = gridContainer.getBoundingClientRect();
-            const firstSlotRect = gridContainer.children[0].getBoundingClientRect();
-            const slotSize = firstSlotRect.width;
-
-            const relativeX = pointerX - gridRect.left - (activeDragShape.matrix[0].length * slotSize) / 2;
-            const relativeY = pointerY - gridRect.top - (activeDragShape.matrix.length * slotSize) / 2;
-
-            const startCol = Math.round(relativeX / slotSize);
-            const startRow = Math.round(relativeY / slotSize);
-
-            if (canPlaceShape(activeDragShape, startRow, startCol)) {
-                for (let r = 0; r < activeDragShape.matrix.length; r++) {
-                    for (let c = 0; c < activeDragShape.matrix[0].length; c++) {
-                        if (activeDragShape.matrix[r][c] === 1) {
-                            const slot = getSlotDOM(startRow + r, startCol + c);
-                            if (slot) slot.classList.add('grid-slot-highlight');
-                        }
-                    }
-                }
-            }
-        }
-
-        function clearBoardHighlights() {
-            const highlights = gridContainer.querySelectorAll('.grid-slot-highlight');
-            highlights.forEach(el => el.classList.remove('grid-slot-highlight'));
-        }
-
-        function handleDragEnd(e) {
-            if (draggingSlotIndex === null) return;
-
-            const pointerX = parseFloat(dragGhost.style.left);
-            const pointerY = parseFloat(dragGhost.style.top);
-
-            const gridRect = gridContainer.getBoundingClientRect();
-            const firstSlotRect = gridContainer.children[0].getBoundingClientRect();
-            const slotSize = firstSlotRect.width;
-
-            const relativeX = pointerX - gridRect.left - (activeDragShape.matrix[0].length * slotSize) / 2;
-            const relativeY = pointerY - gridRect.top - (activeDragShape.matrix.length * slotSize) / 2;
-
-            const startCol = Math.round(relativeX / slotSize);
-            const startRow = Math.round(relativeY / slotSize);
-
-            const slotDOM = document.querySelector(`.dock-slot[data-slot-index="${draggingSlotIndex}"]`);
-
-            if (canPlaceShape(activeDragShape, startRow, startCol)) {
-                placeShape(activeDragShape, startRow, startCol);
-                dockShapes[draggingSlotIndex] = null;
-                if (slotDOM) slotDOM.innerHTML = '';
-                if (dockShapes.every(s => s === null)) fillDockSlots();
-                else checkGameOverCondition();
-            } else {
-                if (slotDOM) slotDOM.style.opacity = '1';
+        function updateUIState() {
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('block_blast_highscore', highScore.toString());
             }
 
-            dragGhost.style.display = 'none';
-            clearBoardHighlights();
-            draggingSlotIndex = null;
-            activeDragShape = null;
+            scoreDisplay.textContent = score.toLocaleString();
+            highScoreDisplay.textContent = highScore.toLocaleString();
+            streakDisplay.textContent = streak;
+            statCoins.textContent = coins.toLocaleString();
+            if (mobileCoinsDisplay) mobileCoinsDisplay.textContent = coins.toLocaleString();
+            statMaxStreak.textContent = maxStreak;
+            statLinesCleared.textContent = totalLinesCleared;
+            statBlocksPlaced.textContent = totalBlocksPlaced;
         }
 
-        async function resetGame() {
+        function resetGame() {
             score = 0;
             streak = 0;
+            maxStreak = 0;
+            totalLinesCleared = 0;
+            totalBlocksPlaced = 0;
             grid = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
-            dockShapes = [null, null, null];
-
-            renderGrid();
-            fillDockSlots();
-            updateScoreDisplays();
 
             gameOverModal.classList.add('opacity-0', 'pointer-events-none');
-            const content = document.getElementById('game-over-content');
-            content.classList.remove('scale-100');
-            content.classList.add('scale-90');
+            document.getElementById('game-over-content').classList.add('scale-90');
+            document.getElementById('game-over-content').classList.remove('scale-100');
 
-            await startSecureGameSession();
+            renderGrid();
+            generateNewDockShapes();
+            updateUIState();
+            startSecureGameSession();
         }
 
         soundToggleBtn.addEventListener('click', () => {
             soundEnabled = !soundEnabled;
-            if (soundEnabled) {
-                soundToggleBtn.classList.replace('bg-slate-700', 'bg-indigo-600');
-                soundToggleDot.classList.replace('translate-x-0', 'translate-x-6');
-            } else {
-                soundToggleBtn.classList.replace('bg-indigo-600', 'bg-slate-700');
-                soundToggleDot.classList.replace('translate-x-6', 'translate-x-0');
-            }
+            soundToggleBtn.classList.toggle('bg-cyan-600', soundEnabled);
+            soundToggleBtn.classList.toggle('bg-slate-700', !soundEnabled);
+            soundToggleDot.classList.toggle('translate-x-6', soundEnabled);
+            soundToggleDot.classList.toggle('translate-x-0', !soundEnabled);
         });
 
         restartBtn.addEventListener('click', resetGame);
+        if (mobileRestartBtn) mobileRestartBtn.addEventListener('click', () => {
+            authModal.classList.add('hidden');
+            resetGame();
+        });
         modalRestartBtn.addEventListener('click', resetGame);
 
-        let authToken = localStorage.getItem('blast_block_token') || null;
-        let userProfile = JSON.parse(localStorage.getItem('blast_block_profile') || 'null');
-        let isSignUpMode = false;
-
         const btnAccount = document.getElementById('btn-account');
-        const accountBtnLabel = document.getElementById('account-btn-label');
-        const accountAvatarImg = document.getElementById('account-avatar-img');
-        const accountIconFallback = document.getElementById('account-icon-fallback');
-        
         const authModal = document.getElementById('auth-modal');
         const authClose = document.getElementById('auth-close');
         const tabLogin = document.getElementById('tab-login');
@@ -1220,82 +1309,113 @@
         const authPassword = document.getElementById('auth-password');
         const authSubmitBtn = document.getElementById('auth-submit-btn');
         const authMsg = document.getElementById('auth-msg');
-        
         const authLoggedOutView = document.getElementById('auth-logged-out-view');
         const authLoggedInView = document.getElementById('auth-logged-in-view');
-        
-        const detailAvatarImg = document.getElementById('detail-avatar-img');
-        const detailAvatarFallback = document.getElementById('detail-avatar-fallback');
-        const detailUsernameDisplay = document.getElementById('detail-username-display');
-        const detailEmailDisplay = document.getElementById('detail-email-display');
-        const detailLastLogin = document.getElementById('detail-last-login');
-        
-        const displayRecordedHighscore = document.getElementById('display-recorded-highscore');
-        const displayRecordedMaxstreak = document.getElementById('display-recorded-maxstreak');
-
         const profileEditForm = document.getElementById('profile-edit-form');
-        const editAvatarUrl = document.getElementById('edit-avatar-url');
-        const editUsername = document.getElementById('edit-username');
         const btnLogout = document.getElementById('btn-logout');
+        const btnLogoutDesktop = document.getElementById('btn-logout-desktop');
 
-        function updateUIState() {
-            applyTheme();
-            applyFrame();
+        let isSignupMode = false;
+        let userProfile = null;
 
-            authToken = localStorage.getItem('blast_block_token');
+        btnAccount.addEventListener('click', () => {
+            topSlideMenu.classList.add('closed');
+            topSlideMenu.classList.remove('open');
+            authModal.classList.remove('hidden');
+            authMsg.textContent = '';
+            refreshAccountModalView();
+        });
 
-            if (authToken && userProfile) {
-                accountBtnLabel.textContent = userProfile.username || 'User';
-                coins = userProfile.coins !== undefined ? userProfile.coins : coins;
-                localStorage.setItem('block_blast_coins', coins.toString());
+        authClose.addEventListener('click', () => authModal.classList.add('hidden'));
+        authModal.addEventListener('click', e => { if (e.target === authModal) authModal.classList.add('hidden'); });
 
-                if (userProfile.active_theme) {
-                    activeTheme = userProfile.active_theme;
-                    localStorage.setItem('block_blast_theme', activeTheme);
-                    applyTheme();
+        tabLogin.addEventListener('click', () => {
+            isSignupMode = false;
+            tabLogin.className = 'flex-1 py-1.5 font-extrabold text-xs rounded-lg bg-cyan-500 text-slate-950 transition';
+            tabSignup.className = 'flex-1 py-1.5 font-extrabold text-xs text-slate-400 rounded-lg transition';
+            authUsername.classList.add('hidden');
+            authSubmitBtn.textContent = 'LOG IN';
+        });
+
+        tabSignup.addEventListener('click', () => {
+            isSignupMode = true;
+            tabSignup.className = 'flex-1 py-1.5 font-extrabold text-xs rounded-lg bg-cyan-500 text-slate-950 transition';
+            tabLogin.className = 'flex-1 py-1.5 font-extrabold text-xs text-slate-400 rounded-lg transition';
+            authUsername.classList.remove('hidden');
+            authSubmitBtn.textContent = 'CREATE ACCOUNT';
+        });
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            authMsg.textContent = 'Authenticating...';
+            try {
+                const res = await fetch('https://testing.blastblock.space/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: isSignupMode ? 'signup' : 'login',
+                        username: authUsername.value.trim(),
+                        email: authEmail.value.trim(),
+                        password: authPassword.value
+                    })
+                });
+                const json = await res.json();
+                if (!res.ok || !json.success) {
+                    authMsg.textContent = json.error || 'Authentication failed.';
+                    return;
                 }
-
-                if (userProfile.active_frame) {
-                    activeFrame = userProfile.active_frame;
-                    localStorage.setItem('block_blast_frame', activeFrame);
-                    applyFrame();
-                }
-
-                if (userProfile.avatar_url) {
-                    accountAvatarImg.src = userProfile.avatar_url;
-                    accountAvatarImg.classList.remove('hidden');
-                    accountIconFallback.classList.add('hidden');
-                    detailAvatarImg.src = userProfile.avatar_url;
-                    detailAvatarImg.classList.remove('hidden');
-                    detailAvatarFallback.classList.add('hidden');
-                } else {
-                    accountAvatarImg.classList.add('hidden');
-                    accountIconFallback.classList.remove('hidden');
-                    detailAvatarImg.classList.add('hidden');
-                    detailAvatarFallback.classList.remove('hidden');
-                }
-
-                detailUsernameDisplay.textContent = userProfile.username || 'User';
-                detailEmailDisplay.textContent = userProfile.email || 'Account Logged In';
-                detailLastLogin.textContent = userProfile.last_login ? new Date(userProfile.last_login).toLocaleString() : 'Just now';
-
-                displayRecordedHighscore.textContent = (userProfile.high_score || 0).toLocaleString();
-                displayRecordedMaxstreak.textContent = (userProfile.highest_streak || 0).toLocaleString();
-
-                editAvatarUrl.value = userProfile.avatar_url || '';
-                editUsername.value = userProfile.username || '';
-
-                authLoggedOutView.classList.add('hidden');
-                authLoggedInView.classList.remove('hidden');
-            } else {
-                accountBtnLabel.textContent = 'Account';
-                accountAvatarImg.classList.add('hidden');
-                accountIconFallback.classList.remove('hidden');
-                authLoggedOutView.classList.remove('hidden');
-                authLoggedInView.classList.add('hidden');
+                localStorage.setItem('blast_block_token', json.token);
+                await fetchProfile();
+                authMsg.textContent = '';
+                refreshAccountModalView();
+            } catch (err) {
+                authMsg.textContent = 'Network error.';
             }
-            updateScoreDisplays();
+        });
+
+        profileEditForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('blast_block_token');
+            if (!token) return;
+
+            authMsg.textContent = 'Saving...';
+            try {
+                const res = await fetch('https://testing.blastblock.space/api/user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        avatar_url: document.getElementById('edit-avatar-url').value.trim(),
+                        username: document.getElementById('edit-username').value.trim()
+                    })
+                });
+                const json = await res.json();
+                if (!res.ok || !json.success) {
+                    authMsg.textContent = json.error || 'Update failed.';
+                    return;
+                }
+                userProfile = { ...userProfile, ...json.profile };
+                localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
+                applyUserProfileUI();
+                refreshAccountModalView();
+                authMsg.textContent = 'Profile updated.';
+            } catch (err) {
+                authMsg.textContent = 'Network error.';
+            }
+        });
+
+        function handleLogout() {
+            localStorage.removeItem('blast_block_token');
+            localStorage.removeItem('blast_block_profile');
+            userProfile = null;
+            applyUserProfileUI();
+            refreshAccountModalView();
         }
+
+        if (btnLogout) btnLogout.addEventListener('click', handleLogout);
+        if (btnLogoutDesktop) btnLogoutDesktop.addEventListener('click', handleLogout);
 
         async function fetchProfile() {
             const token = localStorage.getItem('blast_block_token');
@@ -1304,146 +1424,111 @@
                 const res = await fetch('https://testing.blastblock.space/api/user', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                if (res.status === 401) {
+                    handleLogout();
+                    return;
+                }
                 const json = await res.json();
-                if (json.success) {
-                    userProfile = { ...json.profile, email: json.user.email };
+                if (res.ok && json.profile) {
+                    userProfile = json.profile;
                     localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
-                    if (userProfile.high_score > highScore) {
+
+                    if (typeof userProfile.coins === 'number') {
+                        coins = userProfile.coins;
+                        localStorage.setItem('block_blast_coins', coins.toString());
+                    }
+                    if (typeof userProfile.high_score === 'number' && userProfile.high_score > highScore) {
                         highScore = userProfile.high_score;
                         localStorage.setItem('block_blast_highscore', highScore.toString());
                     }
-                    updateUIState();
+                    if (userProfile.active_theme) {
+                        activeTheme = userProfile.active_theme;
+                        localStorage.setItem('block_blast_theme', activeTheme);
+                    }
+                    if (userProfile.active_frame) {
+                        activeFrame = userProfile.active_frame;
+                        localStorage.setItem('block_blast_frame', activeFrame);
+                    }
+                    applyUserProfileUI();
                 }
             } catch (err) {}
         }
 
-        async function syncProfileData(fields) {
-            const token = localStorage.getItem('blast_block_token');
-            if (!token) return;
-            try {
-                const res = await fetch('https://testing.blastblock.space/api/user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(fields)
-                });
-                const json = await res.json();
-                if (json.success) {
-                    userProfile = { ...userProfile, ...json.profile };
-                    localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
-                    updateUIState();
-                }
-            } catch (err) {}
-        }
+        function applyUserProfileUI() {
+            const label = document.getElementById('account-btn-label');
+            const menuImg = document.getElementById('account-avatar-img');
+            const menuFallback = document.getElementById('account-icon-fallback');
 
-        function setAuthMode(signUp) {
-            isSignUpMode = signUp;
-            authMsg.textContent = '';
-            if (isSignUpMode) {
-                tabSignup.classList.add('bg-cyan-500/30', 'text-cyan-300');
-                tabSignup.classList.remove('text-slate-400');
-                tabLogin.classList.remove('bg-cyan-500/30', 'text-cyan-300');
-                tabLogin.classList.add('text-slate-400');
-                authUsername.classList.remove('hidden');
-                authSubmitBtn.textContent = 'CREATE ACCOUNT';
-            } else {
-                tabLogin.classList.add('bg-cyan-500/30', 'text-cyan-300');
-                tabLogin.classList.remove('text-slate-400');
-                tabSignup.classList.remove('bg-cyan-500/30', 'text-cyan-300');
-                tabSignup.classList.add('text-slate-400');
-                authUsername.classList.add('hidden');
-                authSubmitBtn.textContent = 'LOG IN';
-            }
-        }
-
-        btnAccount.addEventListener('click', () => {
-            authModal.classList.remove('hidden');
-            updateUIState();
-            authToken = localStorage.getItem('blast_block_token');
-            if (authToken) fetchProfile();
-        });
-
-        authClose.addEventListener('click', () => authModal.classList.add('hidden'));
-        authModal.addEventListener('click', e => { if (e.target === authModal) authModal.classList.add('hidden'); });
-
-        tabLogin.addEventListener('click', () => setAuthMode(false));
-        tabSignup.addEventListener('click', () => setAuthMode(true));
-
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            authMsg.textContent = 'Authenticating...';
-            authMsg.className = 'text-xs text-center min-h-[1rem] text-cyan-300';
-
-            try {
-                const res = await fetch('https://testing.blastblock.space/api/auth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: isSignUpMode ? 'signup' : 'login',
-                        email: authEmail.value.trim(),
-                        password: authPassword.value,
-                        username: authUsername.value.trim()
-                    })
-                });
-
-                const json = await res.json();
-                if (!res.ok || json.error) {
-                    authMsg.textContent = json.error || 'Authentication failed.';
-                    authMsg.className = 'text-xs text-center min-h-[1rem] text-red-400';
+            if (userProfile) {
+                label.textContent = userProfile.username || 'Player';
+                if (userProfile.avatar_url) {
+                    menuImg.src = userProfile.avatar_url;
+                    menuImg.classList.remove('hidden');
+                    menuFallback.classList.add('hidden');
                 } else {
-                    authToken = json.session?.access_token || null;
-                    if (authToken) localStorage.setItem('blast_block_token', authToken);
-                    authMsg.textContent = 'Success!';
-                    authMsg.className = 'text-xs text-center min-h-[1rem] text-green-400';
-                    await fetchProfile();
-                    setTimeout(() => authModal.classList.add('hidden'), 800);
+                    menuImg.classList.add('hidden');
+                    menuFallback.classList.remove('hidden');
                 }
-            } catch (err) {
-                authMsg.textContent = 'Server connection failed.';
-                authMsg.className = 'text-xs text-center min-h-[1rem] text-red-400';
+            } else {
+                label.textContent = 'Account';
+                menuImg.classList.add('hidden');
+                menuFallback.classList.remove('hidden');
             }
-        });
 
-        profileEditForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            authMsg.textContent = 'Saving updates...';
-            authMsg.className = 'text-xs text-center min-h-[1rem] text-cyan-300';
-
-            await syncProfileData({
-                avatar_url: editAvatarUrl.value.trim(),
-                username: editUsername.value.trim()
-            });
-
-            authMsg.textContent = 'Profile updated successfully!';
-            authMsg.className = 'text-xs text-center min-h-[1rem] text-green-400';
-        });
-
-        btnLogout.addEventListener('click', () => {
-            localStorage.removeItem('blast_block_token');
-            localStorage.removeItem('blast_block_profile');
-            authToken = null;
-            userProfile = null;
+            applyTheme();
+            applyFrame();
             updateUIState();
-            authMsg.textContent = 'Logged out successfully.';
-            authMsg.className = 'text-xs text-center min-h-[1rem] text-slate-400';
-        });
+        }
 
-        window.onload = async function() {
+        function refreshAccountModalView() {
+            if (!userProfile) {
+                authLoggedOutView.classList.remove('hidden');
+                authLoggedInView.classList.add('hidden');
+                return;
+            }
+
+            authLoggedOutView.classList.add('hidden');
+            authLoggedInView.classList.remove('hidden');
+
+            document.getElementById('detail-username-display').textContent = userProfile.username || 'Player';
+            document.getElementById('detail-email-display').textContent = userProfile.email || '';
+            document.getElementById('detail-last-login').textContent = userProfile.last_login
+                ? new Date(userProfile.last_login).toLocaleDateString()
+                : 'Today';
+
+            document.getElementById('display-recorded-highscore').textContent = (userProfile.high_score || highScore).toLocaleString();
+            document.getElementById('display-recorded-maxstreak').textContent = userProfile.highest_streak || maxStreak;
+
+            document.getElementById('edit-avatar-url').value = userProfile.avatar_url || '';
+            document.getElementById('edit-username').value = userProfile.username || '';
+
+            const detailImg = document.getElementById('detail-avatar-img');
+            const detailFallback = document.getElementById('detail-avatar-fallback');
+            if (userProfile.avatar_url) {
+                detailImg.src = userProfile.avatar_url;
+                detailImg.classList.remove('hidden');
+                detailFallback.classList.add('hidden');
+            } else {
+                detailImg.classList.add('hidden');
+                detailFallback.classList.remove('hidden');
+            }
+
+            applyFrame();
+        }
+
+        async function initApp() {
+            try {
+                const cached = localStorage.getItem('blast_block_profile');
+                if (cached) userProfile = JSON.parse(cached);
+            } catch (e) {}
+
             initGridDOM();
-            renderGrid();
-            fillDockSlots();
-            initDragControls();
-            updateScoreDisplays();
-            await fetchShopCatalog();
-            updateUIState();
-            authToken = localStorage.getItem('blast_block_token');
-            if (authToken) {
-                await fetchProfile();
-            }
-            await startSecureGameSession();
-        };
+            applyUserProfileUI();
+            resetGame();
+            await Promise.all([fetchShopCatalog(), fetchProfile()]);
+        }
+
+        window.onload = initApp;
     </script>
 </body>
 </html>
