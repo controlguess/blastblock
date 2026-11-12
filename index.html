@@ -1431,8 +1431,11 @@
                 const json = await res.json();
                 if (res.ok && json.profile) {
                     userProfile = json.profile;
+                    if (json.user && json.user.email) {
+                        userProfile.email = json.user.email;
+                    }
                     localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
-
+        
                     if (typeof userProfile.coins === 'number') {
                         coins = userProfile.coins;
                         localStorage.setItem('block_blast_coins', coins.toString());
@@ -1449,9 +1452,11 @@
                         activeFrame = userProfile.active_frame;
                         localStorage.setItem('block_blast_frame', activeFrame);
                     }
-                    applyUserProfileUI();
+                    updateUIState();
                 }
-            } catch (err) {}
+            } catch (err) {
+                handleLogout();
+            }
         }
 
         function applyUserProfileUI() {
