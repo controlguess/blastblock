@@ -305,7 +305,7 @@
             const token = localStorage.getItem('blast_block_token');
             if (!token) return;
             try {
-                const res = await fetch('/api/game/start', {
+                const res = await fetch('https://testing.blastblock.space/api/game/start', {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -353,7 +353,7 @@
 
         async function fetchShopCatalog() {
             try {
-                const res = await fetch('/api/shop');
+                const res = await fetch('https://testing.blastblock.space/api/shop');
                 const json = await res.json();
                 if (json.success) {
                     SHOP_DATA = json.shop;
@@ -597,7 +597,7 @@
                 if (item.cost < 0 || coins < item.cost) return;
         
                 try {
-                    const res = await fetch('/api/user', {
+                    const res = await fetch('https://testing.blastblock.space/api/user', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -994,7 +994,7 @@
             const token = localStorage.getItem('blast_block_token');
             if (!token || !currentGameSessionId) return;
             try {
-                const res = await fetch('/api/user', {
+                const res = await fetch('https://testing.blastblock.space/api/user', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1284,7 +1284,7 @@
             const token = localStorage.getItem('blast_block_token');
             if (!token) return;
             try {
-                const res = await fetch('/api/user', {
+                const res = await fetch('https://testing.blastblock.space/api/user', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const json = await res.json();
@@ -1304,7 +1304,7 @@
             const token = localStorage.getItem('blast_block_token');
             if (!token) return;
             try {
-                const res = await fetch('/api/user', {
+                const res = await fetch('https://testing.blastblock.space/api/user', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1360,7 +1360,7 @@
             authMsg.className = 'text-xs text-center min-h-[1rem] text-cyan-300';
 
             try {
-                const res = await fetch('/api/auth', {
+                const res = await fetch('https://testing.blastblock.space/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
