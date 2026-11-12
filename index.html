@@ -593,6 +593,25 @@
                 return;
             }
         
+            if (activeShopTab === 'themes') {
+                activeTheme = item.id;
+                localStorage.setItem('block_blast_theme', activeTheme);
+                if (userProfile) userProfile.active_theme = activeTheme;
+                applyTheme();
+            } else {
+                activeFrame = item.id;
+                localStorage.setItem('block_blast_frame', activeFrame);
+                if (userProfile) userProfile.active_frame = activeFrame;
+                applyFrame();
+            }
+        
+            if (userProfile) {
+                localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
+            }
+        
+            updateUIState();
+            renderShopItems();
+        
             if (!isOwned) {
                 if (item.cost < 0 || coins < item.cost) return;
         
@@ -622,27 +641,14 @@
                     localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
                     coins = json.profile.coins;
                     localStorage.setItem('block_blast_coins', coins.toString());
+                    updateUIState();
+                    renderShopItems();
                 } catch (err) {
                     return;
                 }
-            }
-        
-            if (activeShopTab === 'themes') {
-                activeTheme = item.id;
-                localStorage.setItem('block_blast_theme', activeTheme);
-                applyTheme();
             } else {
-                activeFrame = item.id;
-                localStorage.setItem('block_blast_frame', activeFrame);
-                applyFrame();
-            }
-        
-            updateUIState();
-            renderShopItems();
-        
-            if (isOwned) {
                 try {
-                    const res = await fetch('https://testing.blastblock.space/api/user', {
+                    await fetch('https://testing.blastblock.space/api/user', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -653,13 +659,8 @@
                             active_frame: activeFrame
                         })
                     });
-                    const json = await res.json();
-                    if (json.success && json.profile) {
-                        userProfile = { ...userProfile, ...json.profile };
-                        localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
-                    }
                 } catch (err) {
-                    console.error('Failed to sync equipped state:', err);
+                    console.error('Background sync failed, but local state is preserved:', err);
                 }
             }
         }
