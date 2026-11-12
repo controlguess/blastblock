@@ -1363,6 +1363,15 @@
                 if (!res.ok || !json.success) {
                     authMsg.textContent = json.error || 'Authentication failed.';
                     return;
+                } else {
+                    authToken = json.session?.access_token || null;
+                    if (authToken) {
+                        localStorage.setItem('blast_block_token', authToken);
+                    }
+                    if (json.user) {
+                        userProfile = json.user;
+                        localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
+                    }
                 }
                 localStorage.setItem('blast_block_token', json.token);
                 await fetchProfile();
