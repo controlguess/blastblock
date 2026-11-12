@@ -641,10 +641,26 @@
             renderShopItems();
         
             if (isOwned) {
-                await syncProfileData({
-                    active_theme: activeTheme,
-                    active_frame: activeFrame
-                });
+                try {
+                    const res = await fetch('https://testing.blastblock.space/api/user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            active_theme: activeTheme,
+                            active_frame: activeFrame
+                        })
+                    });
+                    const json = await res.json();
+                    if (json.success && json.profile) {
+                        userProfile = { ...userProfile, ...json.profile };
+                        localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
+                    }
+                } catch (err) {
+                    console.error('Failed to sync equipped state:', err);
+                }
             }
         }
 
