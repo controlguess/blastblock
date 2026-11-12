@@ -28,7 +28,7 @@
 
 .avatar-frame-overlay {
     position: absolute;
-    inset: -14px;
+    inset: -2px;
     border-radius: 9999px;
     z-index: 10;
     pointer-events: none;
