@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://blastblock.space/files/frames.css">
+    <link rel="stylesheet" href="./files/frames.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body {
@@ -22,7 +22,6 @@
             transition: background 0.5s ease;
         }
 
-        /* Themes */
         body.theme-neon { background: radial-gradient(circle at center, #2d0036 0%, #050014 100%); }
         body.theme-emerald { background: radial-gradient(circle at center, #064e3b 0%, #022c22 100%); }
         body.theme-sunset { background: radial-gradient(circle at center, #7c2d12 0%, #450a0a 100%); }
@@ -211,8 +210,7 @@
                 <button id="shop-subtab-inventory" class="flex-1 py-1 font-bold rounded-lg text-slate-400 transition">My Inventory</button>
             </div>
 
-            <div id="shop-items-container" class="overflow-y-auto pr-1 flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 py-2">
-            </div>
+            <div id="shop-items-container" class="overflow-y-auto pr-1 flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 py-2"></div>
         </div>
     </div>
 
@@ -299,33 +297,24 @@
             <p id="auth-msg" class="text-xs text-center min-h-[1rem] text-slate-400"></p>
         </div>
     </div>
+
     <script>
-        async function authenticatedFetch(url, options = {}) {
+        let currentGameSessionId = null;
+
+        async function startSecureGameSession() {
             const token = localStorage.getItem('blast_block_token');
-            const headers = options.headers || {};
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-            options.headers = headers;
-
-            const res = await fetch(url, options);
-            
-            if (res.status === 401) {
-                localStorage.removeItem('blast_block_token');
-                localStorage.removeItem('blast_block_profile');
-                localStorage.removeItem('block_blast_coins');
-                localStorage.removeItem('block_blast_frame');
-                localStorage.removeItem('block_blast_theme');
-                localStorage.removeItem('block_blast_highscore');
-                window.location.reload();
-                return null;
-            }
-
-            return res;
+            if (!token) return;
+            try {
+                const res = await fetch('/api/game/start', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const json = await res.json();
+                if (res.ok && json.sessionId) {
+                    currentGameSessionId = json.sessionId;
+                }
+            } catch (err) {}
         }
-
-        let previewTheme = null;
-        let previewFrame = null;
 
         const GRID_SIZE = 8;
         let score = 0;
@@ -364,7 +353,7 @@
 
         async function fetchShopCatalog() {
             try {
-                const res = await fetch('https://testing.blastblock.space/api/shop');
+                const res = await fetch('/api/shop');
                 const json = await res.json();
                 if (json.success) {
                     SHOP_DATA = json.shop;
@@ -531,22 +520,17 @@
             renderShopItems();
         });
 
-        function formatItemName(name) {
-            if (!name) return '';
-            return name.replace(/\[(.*?)\]/g, '<span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 uppercase ml-1">$1</span>');
-        }
-
         function renderShopItems() {
             shopCoinsDisplay.textContent = coins.toLocaleString();
             shopItemsContainer.innerHTML = '';
-        
+
             const catalogItems = SHOP_DATA[activeShopTab] || [];
             const unlockedList = userProfile?.unlocked_items || ['default', 'frame-none'];
-        
+
             let itemsToRender = [];
-        
+
             if (activeShopSubTab === 'store') {
-                itemsToRender = catalogItems.filter(item => unlockedList.includes(item.id) || item.cost !== -5);
+                itemsToRender = catalogItems.filter(item => item.cost > 0 && !unlockedList.includes(item.id));
             } else {
                 const fallbackMap = SHOP_FALLBACKS[activeShopTab];
                 itemsToRender = unlockedList.map(id => {
@@ -555,7 +539,7 @@
                     return found;
                 }).filter(Boolean);
             }
-        
+
             if (itemsToRender.length === 0) {
                 shopItemsContainer.innerHTML = `
                     <div class="col-span-full py-12 flex flex-col items-center justify-center text-center text-slate-400 gap-2">
@@ -565,78 +549,36 @@
                 `;
                 return;
             }
-        
+
             itemsToRender.forEach(item => {
                 const isOwned = item.cost === 0 || unlockedList.includes(item.id);
-                const isOffsale = item.cost === -5;
                 const isEquipped = activeShopTab === 'themes' ? activeTheme === item.id : activeFrame === item.id;
-                const isPreviewing = activeShopTab === 'themes' ? previewTheme === item.id : previewFrame === item.id;
-        
+
                 const card = document.createElement('div');
                 card.className = 'bg-slate-900/80 p-4 rounded-2xl border border-white/10 flex flex-col justify-between gap-3';
-                
-                let priceLabel = `${item.cost} Coins`;
-                if (isOwned) priceLabel = 'Owned';
-                if (isOffsale && !isOwned) priceLabel = '<span class="text-red-400 font-bold">OFFSALE</span>';
-        
-                let visualPreview = '';
-                if (activeShopTab === 'frames' && item.svg_icon) {
-                    visualPreview = `<div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden mx-auto my-1 ${item.css_class}">${item.svg_icon}</div>`;
-                }
-        
                 card.innerHTML = `
-                    <div class="flex flex-col gap-1 items-center text-center">
-                        <span class="font-bold text-sm text-white flex items-center flex-wrap gap-1 justify-center">${formatItemName(item.name)}</span>
-                        ${visualPreview}
-                        <span class="text-xs text-slate-400">${priceLabel}</span>
+                    <div class="flex flex-col gap-1">
+                        <span class="font-bold text-sm text-white">${item.name}</span>
+                        <span class="text-xs text-slate-400">${isOwned ? 'Owned' : `${item.cost} Coins`}</span>
                     </div>
-                    <div class="flex gap-2">
-                        ${!isOwned && !isOffsale ? `
-                            <button class="preview-item-btn flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
-                                isPreviewing ? 'bg-purple-500/40 text-purple-300 border border-purple-500/50' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/10'
-                            }">
-                                ${isPreviewing ? 'PREVIEWING' : 'PREVIEW'}
-                            </button>
-                        ` : ''}
-                        <button class="shop-item-btn flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
-                            isEquipped 
-                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default col-span-full'
-                                : isOwned 
-                                    ? 'bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-300 border border-cyan-400/50'
-                                    : isOffsale
-                                        ? 'bg-slate-800/50 text-slate-500 border border-white/5 cursor-not-allowed opacity-50'
-                                        : coins >= item.cost 
-                                            ? 'bg-amber-500/30 hover:bg-amber-500/50 text-amber-300 border border-amber-400/50'
-                                            : 'bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed'
-                        }" ${isOffsale && !isOwned ? 'disabled' : ''}>
-                            ${isEquipped ? 'EQUIPPED' : isOwned ? 'EQUIP' : isOffsale ? 'OFFSALE' : 'BUY'}
-                        </button>
-                    </div>
+                    <button class="shop-item-btn w-full py-2 rounded-xl text-xs font-black uppercase tracking-wider transition ${
+                        isEquipped 
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default'
+                            : isOwned 
+                                ? 'bg-cyan-500/30 hover:bg-cyan-500/50 text-cyan-300 border border-cyan-400/50'
+                                : coins >= item.cost 
+                                    ? 'bg-amber-500/30 hover:bg-amber-500/50 text-amber-300 border border-amber-400/50'
+                                    : 'bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed'
+                    }">
+                        ${isEquipped ? 'EQUIPPED' : isOwned ? 'EQUIP' : 'BUY'}
+                    </button>
                 `;
-        
+
                 const btn = card.querySelector('.shop-item-btn');
-                if (!isEquipped && !(isOffsale && !isOwned)) {
-                    btn.addEventListener('click', () => {
-                        previewTheme = null;
-                        previewFrame = null;
-                        handleShopAction(item, isOwned);
-                    });
+                if (!isEquipped) {
+                    btn.addEventListener('click', () => handleShopAction(item, isOwned));
                 }
-        
-                const previewBtn = card.querySelector('.preview-item-btn');
-                if (previewBtn) {
-                    previewBtn.addEventListener('click', () => {
-                        if (activeShopTab === 'themes') {
-                            previewTheme = isPreviewing ? null : item.id;
-                            applyTheme();
-                        } else {
-                            previewFrame = isPreviewing ? null : item.id;
-                            applyFrame();
-                        }
-                        renderShopItems();
-                    });
-                }
-        
+
                 shopItemsContainer.appendChild(card);
             });
         }
@@ -644,15 +586,45 @@
         async function handleShopAction(item, isOwned) {
             previewTheme = null;
             previewFrame = null;
-            
+        
+            const token = localStorage.getItem('blast_block_token');
+            if (!token) {
+                alert('Log in to buy or equip shop items.');
+                return;
+            }
+        
             if (!isOwned) {
-                if (item.cost === -5) return; 
-                if (coins < item.cost) return;
-                coins -= item.cost;
-                localStorage.setItem('block_blast_coins', coins.toString());
-                const unlocked = userProfile?.unlocked_items || ['default', 'frame-none'];
-                if (!unlocked.includes(item.id)) unlocked.push(item.id);
-                if (userProfile) userProfile.unlocked_items = unlocked;
+                if (item.cost < 0 || coins < item.cost) return;
+        
+                try {
+                    const res = await fetch('/api/user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            action: 'buy_item',
+                            itemId: item.id,
+                            itemType: activeShopTab
+                        })
+                    });
+        
+                    const json = await res.json();
+                    if (!res.ok || !json.success) {
+                        alert(json.error || 'Purchase failed');
+                        await fetchProfile();
+                        renderShopItems();
+                        return;
+                    }
+        
+                    userProfile = { ...userProfile, ...json.profile };
+                    localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
+                    coins = json.profile.coins;
+                    localStorage.setItem('block_blast_coins', coins.toString());
+                } catch (err) {
+                    return;
+                }
             }
         
             if (activeShopTab === 'themes') {
@@ -665,50 +637,32 @@
                 applyFrame();
             }
         
-            updateScoreDisplays();
+            updateUIState();
             renderShopItems();
         
-            await syncProfileData({
-                coins: coins,
-                active_theme: activeTheme,
-                active_frame: activeFrame,
-                unlocked_items: userProfile?.unlocked_items || ['default', 'frame-none']
-            });
+            if (isOwned) {
+                await syncProfileData({
+                    active_theme: activeTheme,
+                    active_frame: activeFrame
+                });
+            }
         }
 
         function applyTheme() {
-            const themeToApply = previewTheme || activeTheme;
-            document.body.className = 'min-h-screen w-full overflow-y-auto text-white flex justify-center items-center py-4 lg:py-0 ' + (themeToApply !== 'default' ? `theme-${themeToApply}` : '');
+            document.body.className = 'min-h-screen w-full overflow-y-auto text-white flex justify-center items-center py-4 lg:py-0 ' + (activeTheme !== 'default' ? `theme-${activeTheme}` : '');
         }
-        
+
         function applyFrame() {
-            const frameToApply = previewFrame || activeFrame;
             const avatarBoxMenu = document.getElementById('account-avatar-container');
             const avatarBoxDetail = document.getElementById('detail-avatar-container');
-        
-            const catalogFrameIds = (SHOP_DATA.frames || []).map(f => f.id);
-            const fallbackFrameIds = Object.keys(SHOP_FALLBACKS.frames || {});
-            const allFrames = [...new Set([...catalogFrameIds, ...fallbackFrameIds])];
-        
-            const allCatalogFrames = [...(SHOP_DATA.frames || []), ...Object.values(SHOP_FALLBACKS.frames)];
-            const frameItem = allCatalogFrames.find(f => f.id === frameToApply);
-        
-            [avatarBoxMenu, avatarBoxDetail].forEach(box => {
-                if (!box) return;
-                
-                allFrames.forEach(f => box.classList.remove(f));
-                box.classList.add(frameToApply);
-        
-                const existingSvg = box.querySelector('.frame-svg-overlay');
-                if (existingSvg) existingSvg.remove();
-        
-                if (frameItem && frameItem.svg_icon && frameToApply !== 'frame-none') {
-                    const svgWrapper = document.createElement('div');
-                    svgWrapper.className = 'frame-svg-overlay absolute inset-0 pointer-events-none z-20 flex items-center justify-center p-0.5';
-                    svgWrapper.innerHTML = frameItem.svg_icon;
-                    box.appendChild(svgWrapper);
-                }
+
+            ['frame-none', 'frame-gold', 'frame-neon', 'frame-diamond'].forEach(f => {
+                avatarBoxMenu.classList.remove(f);
+                if (avatarBoxDetail) avatarBoxDetail.classList.remove(f);
             });
+
+            avatarBoxMenu.classList.add(activeFrame);
+            if (avatarBoxDetail) avatarBoxDetail.classList.add(activeFrame);
         }
 
         const particleCanvas = document.getElementById('particle-canvas');
@@ -749,18 +703,6 @@
                 ctx.restore();
             }
         }
-
-        function closeShop() {
-            shopModal.classList.add('hidden');
-            previewTheme = null;
-            previewFrame = null;
-            applyTheme();
-            applyFrame();
-            renderShopItems();
-        }
-        
-        shopClose.addEventListener('click', closeShop);
-        shopModal.addEventListener('click', e => { if (e.target === shopModal) closeShop(); });
 
         function createParticlesAtCell(r, c) {
             const slot = getSlotDOM(r, c);
@@ -1050,28 +992,32 @@
 
         async function syncGameOverStats(finalScore, gameMaxStreak) {
             const token = localStorage.getItem('blast_block_token');
-            if (!token) return;
+            if (!token || !currentGameSessionId) return;
             try {
-                const res = await authenticatedFetch('https://testing.blastblock.space/api/user', {
+                const res = await fetch('/api/user', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
                         action: 'submit_game',
+                        sessionId: currentGameSessionId,
                         game_score: finalScore,
                         game_streak: gameMaxStreak,
                         coins: coins
                     })
                 });
-                if (!res) return;
                 const json = await res.json();
                 if (json.success) {
                     userProfile = { ...userProfile, ...json.profile };
                     localStorage.setItem('blast_block_profile', JSON.stringify(userProfile));
                     updateUIState();
+                } else {
+                    alert('Score submission issue: ' + json.error);
                 }
             } catch (err) {}
+            currentGameSessionId = null;
         }
 
         function initDragControls() {
@@ -1206,7 +1152,7 @@
             activeDragShape = null;
         }
 
-        function resetGame() {
+        async function resetGame() {
             score = 0;
             streak = 0;
             grid = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
@@ -1220,6 +1166,8 @@
             const content = document.getElementById('game-over-content');
             content.classList.remove('scale-100');
             content.classList.add('scale-90');
+
+            await startSecureGameSession();
         }
 
         soundToggleBtn.addEventListener('click', () => {
@@ -1336,8 +1284,9 @@
             const token = localStorage.getItem('blast_block_token');
             if (!token) return;
             try {
-                const res = await authenticatedFetch('https://testing.blastblock.space/api/user');
-                if (!res) return;
+                const res = await fetch('/api/user', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const json = await res.json();
                 if (json.success) {
                     userProfile = { ...json.profile, email: json.user.email };
@@ -1355,14 +1304,14 @@
             const token = localStorage.getItem('blast_block_token');
             if (!token) return;
             try {
-                const res = await authenticatedFetch('https://testing.blastblock.space/api/user', {
+                const res = await fetch('/api/user', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(fields)
                 });
-                if (!res) return;
                 const json = await res.json();
                 if (json.success) {
                     userProfile = { ...userProfile, ...json.profile };
@@ -1411,7 +1360,7 @@
             authMsg.className = 'text-xs text-center min-h-[1rem] text-cyan-300';
 
             try {
-                const res = await fetch('https://testing.blastblock.space/api/auth', {
+                const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1473,23 +1422,10 @@
             await fetchShopCatalog();
             updateUIState();
             authToken = localStorage.getItem('blast_block_token');
-            if (authToken) fetchProfile();
-        };
-
-        window.BlastBlock = {
-            shapes: SHAPES_CONFIG,
-            get grid() { return grid; },
-            get dock() { return dockShapes; },
-            get score() { return score; },
-            set score(v) { score = v; updateScoreDisplays(); },
-            get streak() { return streak; },
-            set streak(v) { streak = v; updateScoreDisplays(); },
-            get coins() { return coins; },
-            set coins(v) { coins = v; updateScoreDisplays(); },
-            addShape(matrix, color) { SHAPES_CONFIG.push({ matrix, color }); },
-            refresh() { renderGrid(); updateScoreDisplays(); },
-            newDock() { dockShapes = [null, null, null]; fillDockSlots(); },
-            restart: resetGame
+            if (authToken) {
+                await fetchProfile();
+            }
+            await startSecureGameSession();
         };
     </script>
 </body>
