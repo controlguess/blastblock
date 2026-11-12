@@ -4,26 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blast Block Leaderboard</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://blastblock.space/files/frames.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../files/frames.css">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
             user-select: none;
             -webkit-user-select: none;
             touch-action: manipulation;
-            background: radial-gradient(circle at center, #1b2559 0%, #090d20 100%);
+            background-color: #090d16;
+            background-image:
+                radial-gradient(circle at 15% 15%, rgba(14, 165, 233, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(245, 158, 11, 0.1) 0%, transparent 45%);
         }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        .font-mono-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+        .arcade-card {
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
         }
         .podium-card {
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -39,58 +43,58 @@
             border-radius: 8px;
         }
         .scrollbar-thin::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(148, 163, 184, 0.25);
             border-radius: 8px;
         }
         .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.35);
+            background: rgba(148, 163, 184, 0.4);
         }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden text-white flex justify-center items-center p-4 lg:p-8">
+<body class="h-[100dvh] w-screen overflow-hidden text-white flex justify-center items-center p-3 sm:p-6">
 
-    <div class="fixed top-4 left-4 lg:top-6 lg:left-8 z-[60]">
-        <a href="/" class="h-10 lg:h-11 px-4 rounded-2xl glass-panel flex items-center gap-2 text-cyan-300 hover:text-white active:scale-95 transition text-xs lg:text-sm font-bold border border-white/15 shadow-lg">
+    <div class="fixed top-3 left-3 sm:top-5 sm:left-6 z-[60]">
+        <a href="/" class="h-10 px-4 rounded-xl arcade-card flex items-center gap-2 text-cyan-300 hover:text-white active:scale-95 transition text-xs sm:text-sm font-extrabold">
             <i class="fa-solid fa-arrow-left"></i>
             <span>Back to Game</span>
         </a>
     </div>
 
-    <div class="w-full h-full max-w-4xl flex flex-col glass-panel rounded-3xl p-5 lg:p-8 overflow-hidden border border-white/15 relative">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-white/10 shrink-0">
+    <div class="w-full h-full max-w-4xl flex flex-col arcade-card rounded-3xl p-4 sm:p-7 overflow-hidden relative mt-10 sm:mt-0">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-5 border-b border-slate-800 shrink-0">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 text-white text-2xl">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 text-xl">
                     <i class="fa-solid fa-trophy"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl lg:text-3xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-amber-300 to-orange-400">
+                    <h1 class="text-xl sm:text-3xl font-black tracking-wide text-white">
                         LEADERBOARD
                     </h1>
-                    <p class="text-xs text-slate-400 font-medium">Top Blast Block Players</p>
+                    <p class="text-xs text-slate-400 font-semibold">Global Top Players</p>
                 </div>
             </div>
 
-            <div class="flex bg-slate-900/80 p-1.5 rounded-2xl border border-white/10 w-full sm:w-auto">
-                <button id="tab-high-score" class="flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-crown text-amber-300"></i>
-                    <span>Highest Score</span>
+            <div class="flex bg-slate-950/90 p-1 rounded-xl border border-slate-800 w-full sm:w-auto">
+                <button id="tab-high-score" class="flex-1 sm:flex-initial px-4 py-2 font-extrabold text-xs sm:text-sm rounded-lg bg-cyan-500 text-slate-950 shadow-md transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-crown"></i>
+                    <span>High Score</span>
                 </button>
-                <button id="tab-high-streak" class="flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-bolt text-orange-400"></i>
-                    <span>Highest Streak</span>
+                <button id="tab-high-streak" class="flex-1 sm:flex-initial px-4 py-2 font-extrabold text-xs sm:text-sm rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Max Streak</span>
                 </button>
             </div>
         </div>
 
-        <div id="leaderboard-container" class="flex-1 overflow-y-auto scrollbar-thin pt-6 pr-1 flex flex-col gap-6">
-            <div id="podium-section" class="grid grid-cols-3 gap-2 sm:gap-4 shrink-0 pt-2"></div>
+        <div id="leaderboard-container" class="flex-1 overflow-y-auto scrollbar-thin pt-5 pr-1 flex flex-col gap-5">
+            <div id="podium-section" class="grid grid-cols-3 gap-2 sm:gap-4 shrink-0 pt-3"></div>
             <div class="flex flex-col gap-2 pb-4" id="rankings-list"></div>
         </div>
 
-        <div id="loading-spinner" class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center z-20 transition-opacity">
+        <div id="loading-spinner" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-20 transition-opacity">
             <div class="flex flex-col items-center gap-3">
                 <i class="fa-solid fa-spinner fa-spin text-3xl text-cyan-400"></i>
-                <span class="text-xs font-bold tracking-widest uppercase text-slate-300">Loading Ranks...</span>
+                <span class="text-xs font-extrabold tracking-widest uppercase text-slate-300">Loading Ranks...</span>
             </div>
         </div>
     </div>
@@ -119,12 +123,10 @@
             showLoading(true);
             try {
                 const res = await fetch('https://testing.blastblock.space/api/leaderboard');
-                
                 if (res.status === 401) {
                     localStorage.removeItem('blast_block_token');
                     localStorage.removeItem('blast_block_profile');
                 }
-
                 if (!res.ok) throw new Error('Failed to load leaderboard data');
                 const json = await res.json();
                 cachedLeaderboardData = json.data || json.leaderboard || [];
@@ -155,9 +157,9 @@
             const top3 = sorted[2];
 
             podiumSection.innerHTML = `
-                ${renderPodiumCard(top2, 2, 'border-slate-400/40', 'from-slate-700/50 to-slate-900/80', 'text-slate-300')}
-                ${renderPodiumCard(top1, 1, 'border-amber-400/60', 'from-amber-500/20 to-slate-900/90', 'text-amber-300', true)}
-                ${renderPodiumCard(top3, 3, 'border-amber-700/40', 'from-amber-900/30 to-slate-900/80', 'text-amber-600')}
+                ${renderPodiumCard(top2, 2, 'border-slate-400/50', 'from-slate-800/80 to-slate-900', 'text-slate-200')}
+                ${renderPodiumCard(top1, 1, 'border-amber-400/70', 'from-amber-500/15 to-slate-900', 'text-amber-300', true)}
+                ${renderPodiumCard(top3, 3, 'border-amber-700/50', 'from-amber-900/25 to-slate-900', 'text-amber-500')}
             `;
 
             const rest = sorted.slice(3);
@@ -174,13 +176,13 @@
             }
 
             gsap.fromTo('.podium-card', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.1 });
-            gsap.fromTo('.ranking-row', { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.3, stagger: 0.05 });
+            gsap.fromTo('.ranking-row', { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.3, stagger: 0.04 });
         }
 
         function renderPodiumCard(player, rank, borderColor, bgGradient, crownColor, isCenter = false) {
-            if (!player) return `<div class="glass-panel p-4 rounded-2xl flex flex-col items-center justify-center text-slate-500 text-xs">No Rank #${rank}</div>`;
+            if (!player) return `<div class="arcade-card p-4 rounded-2xl flex flex-col items-center justify-center text-slate-500 text-xs">No Rank #${rank}</div>`;
 
-            const val = currentTab === 'high_score' 
+            const val = currentTab === 'high_score'
                 ? (player.high_score || 0).toLocaleString()
                 : (player.highest_streak || 0);
 
@@ -188,25 +190,28 @@
             const frameClass = player.active_frame || 'frame-none';
 
             const crownIcons = {
-                1: 'fa-crown text-amber-400 text-2xl',
-                2: 'fa-medal text-slate-300 text-xl',
-                3: 'fa-award text-amber-600 text-xl'
+                1: 'fa-crown text-amber-400 text-xl sm:text-2xl',
+                2: 'fa-medal text-slate-300 text-lg sm:text-xl',
+                3: 'fa-award text-amber-600 text-lg sm:text-xl'
             };
 
             return `
-                <div class="podium-card glass-panel rounded-2xl sm:rounded-3xl p-3 sm:p-5 flex flex-col items-center text-center border ${borderColor} bg-gradient-to-b ${bgGradient} relative ${isCenter ? '-mt-2 shadow-2xl' : ''}">
-                    <div class="absolute -top-3.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border ${borderColor} flex items-center justify-center shadow-lg">
+                <div class="podium-card arcade-card rounded-2xl sm:rounded-3xl p-3 sm:p-5 flex flex-col items-center text-center border ${borderColor} bg-gradient-to-b ${bgGradient} relative ${isCenter ? '-mt-3 shadow-2xl' : ''}">
+                    <div class="absolute -top-3.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-950 border ${borderColor} flex items-center justify-center shadow-lg z-20">
                         <i class="fa-solid ${crownIcons[rank]}"></i>
                     </div>
-                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden mt-3 mb-2 shrink-0 ${frameClass}">
-                        ${player.avatar_url 
-                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover" alt="Avatar">`
-                            : `<i class="fa-solid fa-user text-lg sm:text-2xl text-slate-400"></i>`
-                        }
+                    <div class="avatar-frame-wrapper w-14 h-14 sm:w-18 sm:h-18 mt-3 mb-2 shrink-0">
+                        <div class="avatar-frame-inner">
+                            ${player.avatar_url
+                                ? `<img src="${player.avatar_url}" alt="Avatar">`
+                                : `<i class="fa-solid fa-user text-lg sm:text-2xl text-slate-400"></i>`
+                            }
+                        </div>
+                        <div class="avatar-frame-overlay ${frameClass}"></div>
                     </div>
                     <h3 class="font-black text-xs sm:text-sm text-white truncate w-full">${player.username || 'Anonymous'}</h3>
-                    <div class="mt-2 flex flex-col items-center">
-                        <span class="text-base sm:text-2xl font-black ${crownColor}">${val}</span>
+                    <div class="mt-1.5 flex flex-col items-center">
+                        <span class="font-mono-num text-base sm:text-2xl font-extrabold ${crownColor}">${val}</span>
                         <span class="text-[9px] sm:text-[10px] font-bold text-slate-400 tracking-wider">${label}</span>
                     </div>
                 </div>
@@ -215,31 +220,34 @@
 
         function createRankingRow(player, rank, isCurrentUser) {
             const row = document.createElement('div');
-            row.className = `ranking-row glass-panel p-3.5 rounded-2xl flex items-center justify-between border transition ${
-                isCurrentUser ? 'border-cyan-400/80 bg-cyan-500/10' : 'border-white/10 hover:border-white/20'
+            row.className = `ranking-row arcade-card p-3 sm:p-3.5 rounded-2xl flex items-center justify-between border transition ${
+                isCurrentUser ? 'border-cyan-400 bg-cyan-500/10' : 'border-slate-800 hover:border-slate-700'
             }`;
 
-            const val = currentTab === 'high_score' 
+            const val = currentTab === 'high_score'
                 ? (player.high_score || 0).toLocaleString()
                 : (player.highest_streak || 0);
 
-            const unit = currentTab === 'high_score' ? 'pts' : 'x streak';
+            const unit = currentTab === 'high_score' ? 'pts' : 'x';
             const frameClass = player.active_frame || 'frame-none';
 
             row.innerHTML = `
                 <div class="flex items-center gap-3 min-w-0">
-                    <span class="w-7 text-center font-black text-xs sm:text-sm text-slate-400">#${rank}</span>
-                    <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 ${frameClass}">
-                        ${player.avatar_url 
-                            ? `<img src="${player.avatar_url}" class="w-full h-full object-cover" alt="Avatar">`
-                            : `<i class="fa-solid fa-user text-xs text-slate-400"></i>`
-                        }
+                    <span class="font-mono-num w-7 text-center font-extrabold text-xs sm:text-sm text-slate-400">#${rank}</span>
+                    <div class="avatar-frame-wrapper w-9 h-9 shrink-0">
+                        <div class="avatar-frame-inner">
+                            ${player.avatar_url
+                                ? `<img src="${player.avatar_url}" alt="Avatar">`
+                                : `<i class="fa-solid fa-user text-xs text-slate-400"></i>`
+                            }
+                        </div>
+                        <div class="avatar-frame-overlay ${frameClass}"></div>
                     </div>
                     <span class="font-bold text-xs sm:text-sm text-slate-200 truncate ${isCurrentUser ? 'text-cyan-300 font-black' : ''}">
                         ${player.username || 'Anonymous'} ${isCurrentUser ? '<span class="text-[10px] bg-cyan-500/30 text-cyan-300 px-1.5 py-0.5 rounded font-bold ml-1">YOU</span>' : ''}
                     </span>
                 </div>
-                <div class="flex items-center gap-1 font-black text-xs sm:text-sm ${currentTab === 'high_score' ? 'text-amber-300' : 'text-orange-400'}">
+                <div class="font-mono-num flex items-center gap-1 font-extrabold text-xs sm:text-sm ${currentTab === 'high_score' ? 'text-amber-300' : 'text-orange-400'}">
                     <span>${val}</span>
                     <span class="text-[10px] text-slate-400 font-semibold">${unit}</span>
                 </div>
@@ -251,16 +259,16 @@
         tabHighScore.addEventListener('click', () => {
             if (currentTab === 'high_score') return;
             currentTab = 'high_score';
-            tabHighScore.className = 'flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md transition flex items-center justify-center gap-2';
-            tabHighStreak.className = 'flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl text-slate-400 hover:text-white transition flex items-center justify-center gap-2';
+            tabHighScore.className = 'flex-1 sm:flex-initial px-4 py-2 font-extrabold text-xs sm:text-sm rounded-lg bg-cyan-500 text-slate-950 shadow-md transition flex items-center justify-center gap-2';
+            tabHighStreak.className = 'flex-1 sm:flex-initial px-4 py-2 font-extrabold text-xs sm:text-sm rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-2';
             renderLeaderboard();
         });
 
         tabHighStreak.addEventListener('click', () => {
             if (currentTab === 'highest_streak') return;
             currentTab = 'highest_streak';
-            tabHighStreak.className = 'flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md transition flex items-center justify-center gap-2';
-            tabHighScore.className = 'flex-1 sm:flex-initial px-5 py-2 font-bold text-xs lg:text-sm rounded-xl text-slate-400 hover:text-white transition flex items-center justify-center gap-2';
+            tabHighStreak.className = 'flex-1 sm:flex-initial px-4 py-2 font-extrabold text-xs sm:text-sm rounded-lg bg-orange-500 text-slate-950 shadow-md transition flex items-center justify-center gap-2';
+            tabHighScore.className = 'flex-1 sm:flex-initial px-4 py-2 font-extrabold text-xs sm:text-sm rounded-lg text-slate-400 hover:text-white transition flex items-center justify-center gap-2';
             renderLeaderboard();
         });
 
